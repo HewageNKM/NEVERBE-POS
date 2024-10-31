@@ -2,7 +2,10 @@ import type {Metadata} from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "NEVERBE POS",
+    title: {
+        template: `%s | NEVERBE POS`,
+        default: "NEVERBE POS",
+    },
     description: "NEVERBE POS",
 };
 
