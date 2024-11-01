@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
     const router = useRouter();
+
     const form = useForm<z.infer<typeof LoginFormSchema>>({
         resolver: zodResolver(LoginFormSchema),
         defaultValues: {

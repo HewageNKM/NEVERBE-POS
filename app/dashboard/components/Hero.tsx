@@ -2,8 +2,16 @@ import React from 'react';
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import {IoMenu} from "react-icons/io5";
+import {Menubar, MenubarCheckboxItem, MenubarContent, MenubarMenu, MenubarTrigger} from '@/components/ui/menubar';
 
 const Hero = () => {
     return (
@@ -14,7 +22,7 @@ const Hero = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator/>
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                     <DropdownMenuItem>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
@@ -25,7 +33,21 @@ const Hero = () => {
                     <Button className="text-lg font-medium">Search</Button>
                 </Label>
             </header>
-
+            <Menubar>
+                <MenubarMenu>
+                    <MenubarTrigger>Refund</MenubarTrigger>
+                    <MenubarContent>
+                        <MenubarCheckboxItem>Issue Refund</MenubarCheckboxItem>
+                    </MenubarContent>
+                </MenubarMenu>
+                <MenubarMenu>
+                    <MenubarTrigger>Invoices</MenubarTrigger>
+                    <MenubarContent>
+                        <MenubarCheckboxItem>Last Invoice</MenubarCheckboxItem>
+                        <MenubarCheckboxItem>Invoice</MenubarCheckboxItem>
+                    </MenubarContent>
+                </MenubarMenu>
+            </Menubar>
         </div>
     );
 };
