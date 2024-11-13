@@ -1,5 +1,5 @@
+"use client"
 import {getApp, getApps, initializeApp} from "firebase/app";
-import {getFirestore} from "firebase/firestore";
 import {getAnalytics, isSupported} from "@firebase/analytics";
 import {getAuth} from "firebase/auth";
 
@@ -14,7 +14,6 @@ const firebaseConfig = {
 };
 
 const clientApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(clientApp);
 export const auth = getAuth(clientApp);
 
 let analytics;

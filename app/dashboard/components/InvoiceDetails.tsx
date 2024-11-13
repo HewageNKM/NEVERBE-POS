@@ -3,7 +3,7 @@ import {Button} from "@/components/ui/button";
 
 const InvoiceDetails = () => {
     return (
-        <div className="flex py-4 px-2 relative items-center w-full col-span-2 flex-col">
+        <div className="flex py-4 px-2 relative items-center w-full min-h-[93vh] col-span-2 flex-col">
             <h1 className="text-2xl font-bold">Invoice Details</h1>
             <div className="mt-10 w-full flex flex-col">
                 <div className="border-t-2 w-full"/>
