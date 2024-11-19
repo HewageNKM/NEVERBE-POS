@@ -12,7 +12,7 @@ const VariantForm = ({
                          open,
                          onCancel,
                      }: {
-    selectedItem?: Item,
+    selectedItem: Item | null,
     open: boolean,
     onCancel: () => void,
 }) => {
