@@ -1,3 +1,4 @@
+"use client"
 import React, {useState} from 'react';
 import {CartItem, Item, Variant} from "@/interfaces";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
@@ -6,6 +7,8 @@ import {Button} from '@/components/ui/button';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Input} from "@/components/ui/input";
 import VariantDisplayCard from "@/app/dashboard/components/VariantDisplayCard";
+import {useAppDispatch} from "@/lib/hooks";
+import {addItem} from "@/lib/invoiceSlice/invoiceSlice";
 
 const VariantForm = ({
                          selectedItem,
@@ -16,10 +19,12 @@ const VariantForm = ({
     open: boolean,
     onCancel: () => void,
 }) => {
-
     const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null)
     const [selectedSize, setSelectedSize] = useState("")
     const [qty, setQty] = useState(1)
+
+    const dispatch = useAppDispatch();
+
     const addToCart = () => {
         const newCartItem: CartItem = {
             itemId: selectedItem?.itemId || "",
@@ -33,6 +38,11 @@ const VariantForm = ({
             variantName: selectedVariant?.variantName || ""
         }
         console.log(newCartItem)
+        dispatch(addItem(newCartItem))
+        setSelectedVariant(null)
+        setSelectedSize("")
+        setQty(1)
+        onCancel()
     }
 
     return (

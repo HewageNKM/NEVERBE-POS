@@ -51,7 +51,7 @@ const Products = () => {
     };
 
     return (
-        <div className="rounded-lg p-4 mt-10 bg-white shadow relative lg:min-h-[80vh] md:min-h-[60vh] min-h-screen">
+        <div className="rounded-lg p-4 mt-10 bg-background shadow relative lg:min-h-[80vh] md:min-h-[60vh] min-h-screen">
             <h1 className="lg:text-xl text-lg font-bold tracking-wide">Products</h1>
             <div className="mt-5 flex flex-col justify-between">
                 {/* Display products */}

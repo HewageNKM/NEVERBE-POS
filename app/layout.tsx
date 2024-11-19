@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import "./globals.css";
 import StoreProvider from "@/app/StoreProvider";
 import GlobalProvider from "@/components/GlobalProvider";
+import {ThemeProvider} from "@/app/ThemeProvider";
 
 export const metadata: Metadata = {
     title: {
@@ -21,7 +22,14 @@ export default function RootLayout({
         <body className={``}>
         <StoreProvider>
             <GlobalProvider>
-                {children}
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem
+                    disableTransitionOnChange={false}
+                >
+                    {children}
+                </ThemeProvider>
             </GlobalProvider>
         </StoreProvider>
         </body>

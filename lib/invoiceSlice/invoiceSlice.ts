@@ -2,9 +2,11 @@ import {CartItem} from "@/interfaces";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 interface InvoiceSlice {
+    invoiceId: string | null,
     items: CartItem[]
 }
 const initialState:InvoiceSlice = {
+    invoiceId: null,
     items: []
 }
 

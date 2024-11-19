@@ -6,7 +6,7 @@ import Image from "next/image";
 const VariantDisplayCard = ({variant, onClick}:{variant:Variant, onClick:(variant:Variant)=>void}) => {
     return (
         <Card
-            className="hover:bg-gray-100 cursor-pointer transition-colors"
+            className="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
             onClick={() => onClick(variant)}
         >
             <CardContent className="p-2">

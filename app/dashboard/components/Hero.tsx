@@ -4,10 +4,11 @@ import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Menubar, MenubarCheckboxItem, MenubarContent, MenubarMenu, MenubarTrigger} from '@/components/ui/menubar';
+import DarkModeSelector from "@/components/DarkModeSelector";
 
 const Hero = () => {
     return (
-        <div className="flex flex-row flex-wrap gap-10 bg-white p-4 rounded shadow">
+        <div className="flex flex-row flex-wrap gap-10 bg-white dark:bg-[#0C090A] p-4 rounded shadow">
             <header>
                 <Label className="flex-row flex w-[60vw] lg:w-[40vw] justify-center items-center gap-2">
                     <Input placeholder="search" className="text-lg"/>
@@ -29,6 +30,7 @@ const Hero = () => {
                     </MenubarContent>
                 </MenubarMenu>
             </Menubar>
+            <DarkModeSelector/>
         </div>
     );
 };
