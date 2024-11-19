@@ -2,11 +2,11 @@ import {CartItem} from "@/interfaces";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 interface InvoiceSlice {
-    invoiceId: string | null,
-    items: CartItem[]
+    items: CartItem[],
+    isInvoiceLoading: boolean
 }
 const initialState:InvoiceSlice = {
-    invoiceId: null,
+    isInvoiceLoading: false,
     items: []
 }
 
@@ -14,14 +14,14 @@ export const invoiceSlice = createSlice({
     name: 'invoice',
     initialState,
     reducers: {
-        addItem: (state, action: PayloadAction<CartItem>) => {
-            state.items.push(action.payload)
+        setItems: (state, action: PayloadAction<CartItem[]>) => {
+            state.items = action.payload
         },
-        removeItem: (state, action: PayloadAction<CartItem>) => {
-            state.items = state.items.filter(item => item.itemId !== action.payload.itemId && item.variantId !== action.payload.variantId && item.size !== action.payload.size)
-        }
+        setIsInvoiceLoading: (state, action: PayloadAction<boolean>) => {
+            state.isInvoiceLoading = action.payload
+        },
     }
 })
 
-export const {addItem, removeItem} = invoiceSlice.actions
+export const {setItems,setIsInvoiceLoading} = invoiceSlice.actions
 export default invoiceSlice.reducer

@@ -7,25 +7,23 @@ import {Button} from '@/components/ui/button';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Input} from "@/components/ui/input";
 import VariantDisplayCard from "@/app/dashboard/components/VariantDisplayCard";
-import {useAppDispatch} from "@/lib/hooks";
-import {addItem} from "@/lib/invoiceSlice/invoiceSlice";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {reserveItem} from "@/app/actions/invoiceAction";
+import {setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
+import {getProducts, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 
-const VariantForm = ({
-                         selectedItem,
-                         open,
-                         onCancel,
-                     }: {
-    selectedItem: Item | null,
-    open: boolean,
-    onCancel: () => void,
-}) => {
+const VariantForm = () => {
     const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null)
     const [selectedSize, setSelectedSize] = useState("")
     const [qty, setQty] = useState(1)
-
+    const {
+        selectedItem,
+        isVariantsFormOpen,
+        currentPage
+    } = useAppSelector(state => state.product);
     const dispatch = useAppDispatch();
 
-    const addToCart = () => {
+    const addToCart = async () => {
         const newCartItem: CartItem = {
             itemId: selectedItem?.itemId || "",
             name: selectedItem?.name || "",
@@ -37,16 +35,28 @@ const VariantForm = ({
             variantId: selectedVariant?.variantId || "",
             variantName: selectedVariant?.variantName || ""
         }
-        console.log(newCartItem)
-        dispatch(addItem(newCartItem))
+        try {
+            dispatch(setIsVariantsFormOpen(false));
+            dispatch(setIsInvoiceLoading(true));
+            dispatch(getProducts({page: currentPage, size: 10}));
+            await reserveItem(newCartItem);
+            onCancel()
+        } catch (e) {
+            console.error(e);
+        } finally {
+            dispatch(setIsInvoiceLoading(false));
+        }
+    }
+    const onCancel = () => {
+        dispatch(setIsVariantsFormOpen(false));
+        dispatch(setSelectedItem({} as Item));
         setSelectedVariant(null)
         setSelectedSize("")
         setQty(1)
-        onCancel()
     }
 
     return (
-        <Dialog open={open} onOpenChange={onCancel}>
+        <Dialog open={isVariantsFormOpen} onOpenChange={onCancel}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{
@@ -70,6 +80,9 @@ const VariantForm = ({
                                 ))}
                             </SelectContent>
                         </Select>
+                        <p
+                            className="text-sm text-muted-foreground flex w-full justify-end"
+                        >{selectedVariant.sizes.find(size => size.size === selectedSize)?.stock} in stock</p>
                         <Input
                             type="number"
                             min="1"
@@ -81,7 +94,7 @@ const VariantForm = ({
                 ) : (
                     <ScrollArea className="h-72 w-full rounded-md border p-4">
                         <div className="space-y-4">
-                            {selectedItem?.variants.map((variant) => (
+                            {selectedItem?.variants?.map((variant) => (
                                 <VariantDisplayCard
                                     key={variant.variantId}
                                     variant={variant}

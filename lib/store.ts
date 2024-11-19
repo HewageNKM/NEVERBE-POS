@@ -1,12 +1,14 @@
 import {configureStore} from "@reduxjs/toolkit";
 import {authSlice} from "@/lib/authSlice/authSlice";
 import {invoiceSlice} from "@/lib/invoiceSlice/invoiceSlice";
+import {productSlice} from "@/lib/prodcutSlice/productSlice";
 
 export const makeStore = () => {
     return configureStore({
         reducer: {
             auth: authSlice.reducer,
             invoice: invoiceSlice.reducer,
+            product: productSlice.reducer,
         },
     });
 };

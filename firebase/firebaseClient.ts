@@ -2,6 +2,8 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
 import {getAnalytics, isSupported} from "@firebase/analytics";
 import {getAuth} from "firebase/auth";
+import {collection, getDocs, getFirestore} from "@firebase/firestore";
+import {CartItem} from "@/interfaces";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,7 +17,7 @@ const firebaseConfig = {
 
 const clientApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(clientApp);
-
+export const firestore = getFirestore(clientApp);
 let analytics;
 isSupported().then((supported) => {
     if (supported) {
@@ -24,3 +26,18 @@ isSupported().then((supported) => {
 }).catch((error) => {
     console.error("Analytics not supported:", error);
 });
+
+
+export const getPosCart = async () => {
+    try {
+        const posCartCollection = collection(firestore, "posCart");
+        console.log("Attempting to retrieve POS cart...");
+        const cartSnapshot = await getDocs(posCartCollection);
+        const cartData = cartSnapshot.docs.map(doc => doc.data() as CartItem);
+        console.log("POS cart retrieved successfully:", cartData);
+        return cartData;
+    } catch (error) {
+        console.error("Error retrieving POS cart:", error);
+        throw error;
+    }
+}

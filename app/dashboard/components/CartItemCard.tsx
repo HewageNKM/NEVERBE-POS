@@ -2,8 +2,11 @@
 import React from "react";
 import {CartItem} from "@/interfaces";
 import Image from "next/image";
-import {useAppDispatch} from "@/lib/hooks";
-import {removeItem} from "@/lib/invoiceSlice/invoiceSlice";
+import {releaseItem} from "@/app/actions/invoiceAction";
+import {Button} from "@/components/ui/button";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
+import {getProducts} from "@/lib/prodcutSlice/productSlice";
 
 const CartItemCard = ({
                           item,
@@ -12,6 +15,19 @@ const CartItemCard = ({
 }) => {
     const {thumbnail, name, variantName, itemId, variantId, quantity, price} = item;
     const dispatch = useAppDispatch();
+    const {currentPage} = useAppSelector(state => state.product);
+
+    const removeItemFromCart = async () => {
+        try {
+            dispatch(setIsInvoiceLoading(true));
+            await releaseItem(item);
+            dispatch(getProducts({page: currentPage, size: 10}));
+        } catch (e) {
+            console.error(e);
+        }finally {
+            dispatch(setIsInvoiceLoading(false));
+        }
+    }
     return (
         <li className="flex justify-between items-center my-2 w-full">
             <div className="flex items-center gap-4">
@@ -34,12 +50,13 @@ const CartItemCard = ({
                 <span className="text-lg font-medium">Qty: {quantity}</span>
                 <span className="text-lg font-medium">LKR {price.toFixed(2)}</span>
                 <span className="text-sm text-gray-500">Total: LKR {(quantity * price).toFixed(2)}</span>
-                <button
-                    onClick={() => dispatch(removeItem(item))}
-                    className="mt-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-600 rounded hover:bg-red-50"
+                <Button
+                    variant={"outline"}
+                    onClick={() => removeItemFromCart()}
+                    className="mt-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-600 rounded"
                 >
                     Remove
-                </button>
+                </Button>
             </div>
         </li>
     );

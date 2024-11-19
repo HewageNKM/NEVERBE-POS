@@ -2,7 +2,7 @@
 import React, {ReactNode, useEffect} from 'react';
 import {onAuthStateChanged} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
-import {isUserExists} from "@/app/actions/loginAction";
+import {isUserExists} from "@/app/actions/authAction";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setUser} from "@/lib/authSlice/authSlice";
 import {User} from "@/interfaces";

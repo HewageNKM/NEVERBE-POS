@@ -8,8 +8,8 @@ import {Input} from "@/components/ui/input";
 import React, {useEffect, useState} from "react";
 import {LoginFormSchema} from "@/lib/definitions";
 import {useRouter} from "next/navigation";
-import {authenticateUser} from "@/app/actions/loginAction";
-import LoadingScreen from "@/components/ui/LoadingScreen";
+import {authenticateUser} from "@/app/actions/authAction";
+import LoadingScreen from "@/components/LoadingScreen";
 import {useAppSelector} from "@/lib/hooks";
 
 const LoginForm = () => {

@@ -8,23 +8,18 @@ import {
     PaginationNext,
     PaginationPrevious
 } from '@/components/ui/pagination';
-import React, {useEffect, useState} from 'react';
-import {getInventory} from "@/app/actions/prodcutsAction";
+import React, {useEffect} from 'react';
 import {Item} from "@/interfaces";
 import ItemCard from "@/app/dashboard/components/ItemCard";
-import LoadingScreen from '@/components/ui/LoadingScreen';
+import LoadingScreen from '@/components/LoadingScreen';
 import VariantForm from "@/app/dashboard/components/VariantForm";
-import {useAppSelector} from "@/lib/hooks";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {getProducts, setCurrentPage, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 
 const Products = () => {
-    const [products, setProducts] = useState([] as Item[]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [isLoading, setIsLoading] = useState(true)
-    const [isVariantsFormOpen, setIsVariantsFormOpen] = useState(false)
-
-    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
-
+    const {currentPage, isVariantsFormOpen, products, isLoading} = useAppSelector(state => state.product);
     const {user} = useAppSelector(state => state.auth);
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         if (user) {
@@ -33,25 +28,21 @@ const Products = () => {
     }, [currentPage, user]);
 
     const fetchData = async () => {
-        setIsLoading(true);
         try {
-            const items: Item[] = await getInventory(currentPage, 10);
-            setProducts(items);
+            dispatch(getProducts({page: currentPage, size: 10}));
         } catch (error) {
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     }
     // Handlers for pagination
     const handlePageChange = (page: number) => {
         if (page >= 1) {
-            setCurrentPage(page);
+            dispatch(setCurrentPage(page));
         }
     };
-
     return (
-        <div className="rounded-lg p-4 mt-10 bg-background shadow relative lg:min-h-[80vh] md:min-h-[60vh] min-h-screen">
+        <div
+            className="rounded-lg p-4 mt-10 bg-background shadow relative lg:min-h-[80vh] md:min-h-[60vh] min-h-screen">
             <h1 className="lg:text-xl text-lg font-bold tracking-wide">Products</h1>
             <div className="mt-5 flex flex-col justify-between">
                 {/* Display products */}
@@ -60,8 +51,8 @@ const Products = () => {
                         {products.map((product: Item) => (
                             <li key={product.itemId} className="mb-4">
                                 <ItemCard item={product} onAdd={() => {
-                                    setSelectedItem(product)
-                                    setIsVariantsFormOpen(true)
+                                    dispatch(setSelectedItem(product));
+                                    dispatch(setIsVariantsFormOpen(true))
                                 }}/>
                             </li>
                         ))}
@@ -116,14 +107,7 @@ const Products = () => {
             </div>
             {isLoading && (<LoadingScreen type={"component"}/>)}
             {isVariantsFormOpen && (
-                <VariantForm
-                    selectedItem={selectedItem}
-                    open={isVariantsFormOpen}
-                    onCancel={() => {
-                        setIsVariantsFormOpen(false)
-                        setSelectedItem(null)
-                    }}
-                />
+                <VariantForm/>
             )}
         </div>
     );
