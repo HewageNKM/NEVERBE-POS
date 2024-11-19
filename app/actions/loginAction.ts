@@ -25,3 +25,15 @@ export const authenticateUser = async (email: string, password: string) => {
         new Error('Failed to authenticate user')
     }
 }
+
+export const isUserExists = async (uid: string) => {
+    const token = await auth.currentUser?.getIdToken();
+    const response = await axios({
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        url: `/api/v1/users/${uid}`,
+    });
+    return response.status === 200 ? response.data : null;
+}

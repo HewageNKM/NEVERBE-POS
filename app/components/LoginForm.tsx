@@ -5,15 +5,17 @@ import {z} from "zod";
 import {Button} from "@/components/ui/button";
 import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {LoginFormSchema} from "@/lib/definitions";
 import {useRouter} from "next/navigation";
 import {authenticateUser} from "@/app/actions/loginAction";
 import LoadingScreen from "@/components/ui/LoadingScreen";
+import {useAppSelector} from "@/lib/hooks";
 
 const LoginForm = () => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const {user} = useAppSelector(state => state.auth);
 
     const form = useForm<z.infer<typeof LoginFormSchema>>({
         resolver: zodResolver(LoginFormSchema),
@@ -46,6 +48,11 @@ const LoginForm = () => {
             setIsLoading(false);
         }
     }
+    useEffect(() => {
+        if (user) {
+            router.replace('/dashboard');
+        }
+    }, [user]);
 
     return (
         <div className="w-full flex justify-center items-center">

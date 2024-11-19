@@ -13,15 +13,24 @@ import {getInventory} from "@/app/actions/prodcutsAction";
 import {Item} from "@/interfaces";
 import ItemCard from "@/app/dashboard/components/ItemCard";
 import LoadingScreen from '@/components/ui/LoadingScreen';
+import VariantForm from "@/app/dashboard/components/VariantForm";
+import {useAppSelector} from "@/lib/hooks";
 
 const Products = () => {
     const [products, setProducts] = useState([] as Item[]);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true)
+    const [isVariantsFormOpen, setIsVariantsFormOpen] = useState(false)
+
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+
+    const {user} = useAppSelector(state => state.auth);
 
     useEffect(() => {
-        fetchData();
-    }, [currentPage]);
+        if (user) {
+            fetchData();
+        }
+    }, [currentPage, user]);
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -50,7 +59,10 @@ const Products = () => {
                     <ul className="grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-5 md:gap-10">
                         {products.map((product: Item) => (
                             <li key={product.itemId} className="mb-4">
-                                <ItemCard item={product}/>
+                                <ItemCard item={product} onAdd={() => {
+                                    setSelectedItem(product)
+                                    setIsVariantsFormOpen(true)
+                                }}/>
                             </li>
                         ))}
                     </ul>
@@ -103,6 +115,16 @@ const Products = () => {
                 </Pagination>
             </div>
             {isLoading && (<LoadingScreen type={"component"}/>)}
+            {isVariantsFormOpen && (
+                <VariantForm
+                    selectedItem={selectedItem}
+                    open={isVariantsFormOpen}
+                    onCancel={() => {
+                        setIsVariantsFormOpen(false)
+                        setSelectedItem(null)
+                    }}
+                />
+            )}
         </div>
     );
 };

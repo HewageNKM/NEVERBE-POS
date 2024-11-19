@@ -1,9 +1,9 @@
 import React from 'react';
-import { Item } from "@/interfaces";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import {Item} from "@/interfaces";
+import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
 import Image from "next/image";
 
-const ItemCard = ({ item }: { item: Item }) => {
+const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
     return (
         <Card className="bg-white shadow-md rounded-lg w-[12rem] relative flex flex-col">
             {/* Image Section */}
@@ -32,7 +32,7 @@ const ItemCard = ({ item }: { item: Item }) => {
 
             {/* Action Section (e.g., Add to Cart Button) */}
             <CardFooter className="p-1 mt-1 flex justify-center">
-                <button className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 w-full">
+                <button onClick={onAdd} className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 w-full">
                     Add to Cart
                 </button>
             </CardFooter>

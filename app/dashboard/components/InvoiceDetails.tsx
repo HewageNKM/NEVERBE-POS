@@ -1,14 +1,27 @@
+"use client"
 import React from 'react';
 import {Button} from "@/components/ui/button";
+import {useAppSelector} from "@/lib/hooks";
+import Profile from "@/components/Profile";
+import LiveClock from "@/components/LiveClock";
 
 const InvoiceDetails = () => {
+    const {items} = useAppSelector(state => state.invoice);
+
     return (
         <div className="flex py-4 px-2 relative items-center w-full min-h-[93vh] col-span-2 flex-col">
+            <div className="flex flex-col w-full gap-5">
+                <div className="flex-row flex items-center justify-between w-full">
+                    <Profile/>
+                    <LiveClock/>
+                </div>
+                <div className="flex justify-end ">
+                    <h1 className="text-xl font-bold">Invoices:0</h1>
+                </div>
+            </div>
             <h1 className="text-2xl font-bold">Invoice Details</h1>
             <div className="mt-10 w-full flex flex-col">
                 <div className="border-t-2 w-full"/>
-                <div className="flex flex-col justify-between gap-1 mt-5">
-                </div>
             </div>
             <div className="w-full flex flex-col bottom-2 px-2 absolute">
                 <div className="border-t-2 w-full"/>
