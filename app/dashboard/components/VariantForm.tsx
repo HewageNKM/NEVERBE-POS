@@ -11,6 +11,7 @@ import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {reserveItem} from "@/app/actions/invoiceAction";
 import {setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
 import {getProducts, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
+import {showAlert} from "@/lib/alertSlice/alertSlice";
 
 const VariantForm = () => {
     const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null)
@@ -39,7 +40,10 @@ const VariantForm = () => {
             dispatch(setIsVariantsFormOpen(false));
             dispatch(setIsInvoiceLoading(true));
             dispatch(getProducts({page: currentPage, size: 10}));
-            await reserveItem(newCartItem);
+            const status = await reserveItem(newCartItem);
+            if (status == 400) {
+                dispatch(showAlert({title: "Item is out of stock", buttonTitle: "OK",showAlert: true}))
+            }
             onCancel()
         } catch (e) {
             console.error(e);

@@ -15,9 +15,10 @@ export const reserveItem = async (item: CartItem) => {
                 Authorization: `Bearer ${token}`
             }
         });
-        return res.status == 200;
+        return res.status
     } catch (e) {
         console.error(e);
+        return e.response.status;
     }
 }
 export const releaseItem = async (item: CartItem) => {

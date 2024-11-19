@@ -21,6 +21,9 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
                 <p className="text-sm bg-yellow-500 absolute bottom-2 right-2 px-2 py-1 rounded font-medium capitalize">
                     {item.variants.length} Variants
                 </p>
+                <p className="text-sm bg-red-500 absolute top-1 uppercase left-2 px-2 py-1 rounded font-medium">
+                    {item.itemId}
+                </p>
             </CardHeader>
 
             {/* Product Details Section */}

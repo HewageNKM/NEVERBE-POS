@@ -7,7 +7,10 @@ export const getInventory = async (page:number,size:number) => {
     const response = await axios({
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+            Expires: '0',
         },
         url: `/api/v1/inventory?page=${page}&size=${size}`,
     });

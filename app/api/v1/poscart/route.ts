@@ -19,6 +19,9 @@ export const POST = async (req: NextRequest) => {
         return NextResponse.json("POST request received");
     } catch (error) {
         console.error("An error occurred while processing the GET request:", error);
+        if(error.message === 'Insufficient Stock') {
+            return NextResponse.json({message: 'Insufficient Stock'}, {status: 400});
+        }
         return NextResponse.json({message: 'Internal Server Error'}, {status: 500});
     }
 };

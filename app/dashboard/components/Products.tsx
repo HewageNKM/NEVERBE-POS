@@ -15,9 +15,11 @@ import LoadingScreen from '@/components/LoadingScreen';
 import VariantForm from "@/app/dashboard/components/VariantForm";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getProducts, setCurrentPage, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
+import Alert from "@/components/Alert";
 
 const Products = () => {
     const {currentPage, isVariantsFormOpen, products, isLoading, currentSize} = useAppSelector(state => state.product);
+    const {showAlert} = useAppSelector(state => state.alert);
     const {user} = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch();
 
@@ -109,6 +111,7 @@ const Products = () => {
             {isVariantsFormOpen && (
                 <VariantForm/>
             )}
+            {showAlert && (<Alert/>)}
         </div>
     );
 };

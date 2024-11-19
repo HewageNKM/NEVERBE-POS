@@ -59,25 +59,25 @@ export const addItemToPosCart = async (item: CartItem) => {
         const itemDoc = await documentReference.get();
         if (!itemDoc.exists) {
             console.warn(`Item with ID ${item.itemId} not found.`);
-             new Error('Item not found');
+            throw new Error('Item not found');
         }
 
         const itemData = itemDoc.data() as Item;
         const variant = itemData.variants.find(variant => variant.variantId === item.variantId);
         if (!variant) {
             console.warn(`Variant with ID ${item.variantId} not found.`);
-             new Error('Variant not found');
+            throw new Error('Variant not found');
         }
 
         const size = variant?.sizes.find(size => size.size === item.size);
         if (!size) {
             console.warn(`Size ${item.size} not found.`);
-             new Error('Size not found');
+            throw new Error('Size not found');
         }
 
         if (size.stock < item.quantity) {
             console.warn(`Insufficient stock. Requested: ${item.quantity}, Available: ${size.stock}`);
-             new Error("Insufficient Stock");
+            throw Error("Insufficient Stock");
         }
 
         console.log(`Sufficient stock found. Deducted ${item.quantity} units from stock.`);
@@ -101,8 +101,29 @@ export const addItemToPosCart = async (item: CartItem) => {
             return variant;
         });
 
-        await documentReference.update({ variants: updatedVariants });
-        await adminFirestore.collection("posCart").add(item);
+        await documentReference.update({variants: updatedVariants});
+        // Check if the item already exists in posCart
+        const cartQuery = await adminFirestore
+            .collection("posCart")
+            .where("itemId", "==", item.itemId)
+            .where("variantId", "==", item.variantId)
+            .where("size", "==", item.size)
+            .get();
+
+        if (!cartQuery.empty) {
+            // If the item exists, update the quantity
+            const existingCartDoc = cartQuery.docs[0];
+            const existingCartItem = existingCartDoc.data() as CartItem;
+
+            const newQuantity = existingCartItem.quantity + item.quantity;
+
+            await existingCartDoc.ref.update({quantity: newQuantity});
+            console.log(`Updated quantity for existing cart item: New Quantity: ${newQuantity}`);
+        } else {
+            // If the item doesn't exist, add a new cart item
+            await adminFirestore.collection("posCart").add(item);
+            console.log("Item added to POS cart successfully:", item);
+        }
         console.log("Item added to POS cart and inventory updated successfully:", item);
     } catch (error) {
         console.error("Error adding item to POS cart:", error);
@@ -117,20 +138,20 @@ export const removeFromPostCart = async (item: CartItem) => {
         const itemDoc = await documentReference.get();
         if (!itemDoc.exists) {
             console.warn(`Item with ID ${item.itemId} not found.`);
-             new Error('Item not found');
+            throw new Error('Item not found');
         }
 
         const itemData = itemDoc.data() as Item;
         const variant = itemData.variants.find(variant => variant.variantId === item.variantId);
         if (!variant) {
             console.warn(`Variant with ID ${item.variantId} not found.`);
-             new Error('Variant not found');
+            throw new Error('Variant not found');
         }
 
         const size = variant?.sizes.find(size => size.size === item.size);
         if (!size) {
             console.warn(`Size ${item.size} not found.`);
-             new Error('Size not found');
+            throw new Error('Size not found');
         }
 
         // Update inventory
@@ -164,9 +185,10 @@ export const removeFromPostCart = async (item: CartItem) => {
             }
         });
 
-        await adminFirestore.collection("inventory").doc(item.itemId).update({ variants: updatedVariants });
+        await adminFirestore.collection("inventory").doc(item.itemId).update({variants: updatedVariants});
         // Wait for all deletions to complete
-        await Promise.all(deletePromises);console.log("Matching items removed from POS cart.");
+        await Promise.all(deletePromises);
+        console.log("Matching items removed from POS cart.");
         console.log("Item removed from POS cart and inventory updated successfully:", item);
     } catch (error) {
         console.error("Error removing item from POS cart:", error);
