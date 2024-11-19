@@ -17,7 +17,7 @@ import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getProducts, setCurrentPage, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 
 const Products = () => {
-    const {currentPage, isVariantsFormOpen, products, isLoading} = useAppSelector(state => state.product);
+    const {currentPage, isVariantsFormOpen, products, isLoading, currentSize} = useAppSelector(state => state.product);
     const {user} = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch();
 
@@ -29,7 +29,7 @@ const Products = () => {
 
     const fetchData = async () => {
         try {
-            dispatch(getProducts({page: currentPage, size: 10}));
+            dispatch(getProducts({page: currentPage, size: currentSize}));
         } catch (error) {
             console.error(error);
         }

@@ -38,6 +38,13 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
             console.error(e);
         }
     }, [authUser, dispatch, router]);
+
+    useEffect(() => {
+        const user = window.localStorage.getItem('neverPosUser');
+        if (user) {
+            dispatch(setUser(JSON.parse(user)));
+        }
+    }, [dispatch]);
     return (
         <>
             {children}

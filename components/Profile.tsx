@@ -15,7 +15,7 @@ const Profile = () => {
     const router = useRouter();
 
     const getInitials = (name) => {
-        return name?.split(' ').map(word => word[0]).join('').toUpperCase() || '??';
+        return name?.split(' ').map((word:string[]) => word[0]).join('').toUpperCase() || '??';
     };
 
     const logout = async () => {
@@ -23,7 +23,7 @@ const Profile = () => {
             dispatch(clearUser());
             await auth.signOut();
             router.replace('/');
-        } catch (e: any) {
+        } catch (e) {
             console.error(e);
         }
     }

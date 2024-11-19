@@ -1,3 +1,4 @@
+"use client"
 import {signInWithEmailAndPassword} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
 import axios from "axios";

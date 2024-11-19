@@ -26,7 +26,7 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
             {/* Product Details Section */}
             <CardContent className="flex flex-col justify-between flex-grow p-4">
                 <h3 className="text-lg font-semibold truncate">{item.name}</h3>
-                <p className="text-sm">{item.brand}</p>
+                <p className="text-sm capitalize">{item.brand}</p>
                 <p className="text-sm mt-2">LKR {item.sellingPrice}</p>
             </CardContent>
 

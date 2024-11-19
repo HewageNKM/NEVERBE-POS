@@ -1,6 +1,7 @@
 import {getUserById, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {NextRequest} from "next/server";
 
-export const authorizeRequest = async (req: any) => {
+export const authorizeRequest = async (req:NextRequest) => {
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 

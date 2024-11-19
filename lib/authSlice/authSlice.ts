@@ -1,4 +1,3 @@
-// Define the shape of the auth slice state
 import {User} from "@/interfaces";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
@@ -6,16 +5,9 @@ interface AuthState {
     user: User | null;
 }
 
-const initializeUser = () => {
-    const user = window.localStorage.getItem('neverPosUser');
-    if (user) {
-        return JSON.parse(user);
-    }
-    return null;
-}
 // Initial state with correct typing
 const initialState: AuthState = {
-    user: initializeUser(),
+    user: null,
 };
 
 // Create slice with proper type annotations

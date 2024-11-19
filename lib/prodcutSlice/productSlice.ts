@@ -5,12 +5,14 @@ import {getInventory} from "@/app/actions/prodcutsAction";
 interface ProductSlice {
     products: Item[],
     currentPage: number,
+    currentSize: number,
     isLoading: boolean,
     isVariantsFormOpen: boolean,
     selectedItem: Item | null
 }
 
 const initialState: ProductSlice = {
+    currentSize: 8,
     products: [],
     currentPage: 1,
     isLoading: true,

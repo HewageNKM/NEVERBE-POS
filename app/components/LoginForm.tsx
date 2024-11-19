@@ -25,7 +25,7 @@ const LoginForm = () => {
         },
     });
 
-    const handleLogin = async (data: any) => {
+    const handleLogin = async (data: { email: string; password: string; }) => {
         setIsLoading(true);
         try {
             const user = await authenticateUser(data.email, data.password);

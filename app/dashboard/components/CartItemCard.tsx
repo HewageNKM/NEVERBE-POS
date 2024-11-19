@@ -13,15 +13,15 @@ const CartItemCard = ({
                       }: {
     item: CartItem;
 }) => {
-    const {thumbnail, name, variantName, itemId, variantId, quantity, price} = item;
+    const {thumbnail, name, variantName, itemId, variantId, quantity, price, size} = item;
     const dispatch = useAppDispatch();
-    const {currentPage} = useAppSelector(state => state.product);
+    const {currentPage,currentSize} = useAppSelector(state => state.product);
 
     const removeItemFromCart = async () => {
         try {
             dispatch(setIsInvoiceLoading(true));
             await releaseItem(item);
-            dispatch(getProducts({page: currentPage, size: 10}));
+            dispatch(getProducts({page: currentPage, size: currentSize}));
         } catch (e) {
             console.error(e);
         }finally {
@@ -40,9 +40,9 @@ const CartItemCard = ({
                 />
                 <div>
                     <p className="text-lg font-medium">{name}</p>
-                    <p className="text-sm text-gray-500 capitalize">{variantName}</p>
-                    <p className="text-sm text-gray-400">
-                        ID: {itemId}, Variant: {variantId}
+                    <p className="text-sm text-gray-500 capitalize">{variantName}/{size}</p>
+                    <p className="text-sm text-gray-400 uppercase">
+                        {itemId}/ {variantId}
                     </p>
                 </div>
             </div>
