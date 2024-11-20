@@ -7,12 +7,14 @@ import LiveClock from "@/components/LiveClock";
 import CartItemCard from "@/app/dashboard/components/CartItemCard";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import LoadingScreen from "@/components/LoadingScreen";
-import {getPosCartItems} from "@/lib/invoiceSlice/invoiceSlice";
+import {getPosCartItems, setShowPaymentDialog} from "@/lib/invoiceSlice/invoiceSlice";
+import PaymentForm from "@/app/dashboard/components/PaymentForm";
 
 const InvoiceDetails = () => {
-    const {items, isInvoiceLoading} = useAppSelector((state) => state.invoice);
+    const {items, isInvoiceLoading,showPaymentDialog} = useAppSelector((state) => state.invoice);
     const dispatch = useAppDispatch();
     const {user} = useAppSelector((state) => state.auth);
+
     // Calculate totals
     const subtotal = items?.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const total = subtotal;
@@ -74,10 +76,11 @@ const InvoiceDetails = () => {
             </span>
                     </div>
                 </div>
-                <Button className="w-full mt-2 text-lg font-medium">
+                <Button onClick={()=>dispatch(setShowPaymentDialog(true))} disabled={items.length == 0} className="w-full mt-2 text-lg disabled:cursor-not-allowed disabled:bg-opacity-60 font-medium">
                     Place Order
                 </Button>
             </div>
+            {showPaymentDialog && (<PaymentForm />)}
         </div>
     );
 };

@@ -4,11 +4,13 @@ import {getPosCart} from "@/app/actions/invoiceAction";
 
 interface InvoiceSlice {
     items: CartItem[],
+    showPaymentDialog: boolean,
     isInvoiceLoading: boolean
 }
 
 const initialState: InvoiceSlice = {
     isInvoiceLoading: false,
+    showPaymentDialog: false,
     items: []
 }
 
@@ -22,6 +24,9 @@ export const invoiceSlice = createSlice({
         setIsInvoiceLoading: (state, action: PayloadAction<boolean>) => {
             state.isInvoiceLoading = action.payload
         },
+        setShowPaymentDialog: (state, action: PayloadAction<boolean>) => {
+            state.showPaymentDialog = action.payload
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(getPosCartItems.pending, (state) => {
@@ -43,5 +48,5 @@ export const getPosCartItems = createAsyncThunk('invoice/getPosCartItems', async
         return thunkAPI.rejectWithValue(e.response);
     }
 });
-export const {setItems, setIsInvoiceLoading} = invoiceSlice.actions
+export const {setItems, setIsInvoiceLoading, setShowPaymentDialog} = invoiceSlice.actions
 export default invoiceSlice.reducer
