@@ -20,6 +20,7 @@ export const authSlice = createSlice({
         },
         clearUser: (state) => {
             state.user = null;
+            window.localStorage.removeItem('neverPosUser');
         }
     }
 });

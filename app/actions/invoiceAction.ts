@@ -6,7 +6,7 @@ import {auth} from "@/firebase/firebaseClient";
 export const reserveItem = async (item: CartItem) => {
     try {
         const token = await auth.currentUser?.getIdToken();
-        const res = await axios({
+        return await axios({
             method: 'POST',
             url: '/api/v1/poscart',
             data: JSON.stringify(item),
@@ -14,11 +14,9 @@ export const reserveItem = async (item: CartItem) => {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             }
-        });
-        return res.status
+        })
     } catch (e) {
-        console.error(e);
-        return e.response.status;
+        throw e;
     }
 }
 export const releaseItem = async (item: CartItem) => {
@@ -35,6 +33,22 @@ export const releaseItem = async (item: CartItem) => {
         });
         return res.status == 200;
     } catch (e) {
-        console.error(e);
+        throw e;
+    }
+}
+export const getPosCart = async () => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await axios({
+            method: 'GET',
+            url: '/api/v1/poscart',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log(res.data);
+        return res.data;
+    } catch (e) {
+        throw e;
     }
 }

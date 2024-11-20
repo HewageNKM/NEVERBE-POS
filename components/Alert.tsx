@@ -5,9 +5,9 @@ import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogContent,
-    AlertDialogDescription,
     AlertDialogFooter,
-    AlertDialogHeader
+    AlertDialogHeader,
+    AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 
 const Alert = () => {
@@ -18,9 +18,9 @@ const Alert = () => {
         <AlertDialog open={showAlert}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle>
                         {title}
-                    </AlertDialogDescription>
+                    </AlertDialogTitle>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogAction onClick={() => dispatch(hideAlert())}>{buttonTitle}</AlertDialogAction>

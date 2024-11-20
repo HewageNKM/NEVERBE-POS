@@ -59,7 +59,6 @@ export const getProducts = createAsyncThunk('product/getInventory', async ({page
     try {
         return await getInventory(page, size);
     } catch (e) {
-        console.error(e)
         return thunkAPI.rejectWithValue(e)
     }
 });

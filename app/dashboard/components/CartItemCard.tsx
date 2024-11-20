@@ -5,7 +5,7 @@ import Image from "next/image";
 import {releaseItem} from "@/app/actions/invoiceAction";
 import {Button} from "@/components/ui/button";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
+import {getPosCartItems, setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
 import {getProducts} from "@/lib/prodcutSlice/productSlice";
 
 const CartItemCard = ({
@@ -21,10 +21,11 @@ const CartItemCard = ({
         try {
             dispatch(setIsInvoiceLoading(true));
             await releaseItem(item);
-            dispatch(getProducts({page: currentPage, size: currentSize}));
         } catch (e) {
             console.error(e);
         }finally {
+            dispatch(getProducts({page: currentPage, size: currentSize}));
+            dispatch(getPosCartItems());
             dispatch(setIsInvoiceLoading(false));
         }
     }

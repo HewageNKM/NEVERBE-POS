@@ -20,6 +20,6 @@ export const GET = async (req: NextRequest) => {
         return NextResponse.json(items);
     } catch (error) {
         console.error("An error occurred while processing the GET request:", error);
-        return NextResponse.json({message: 'Internal Server Error'}, {status: 500});
+        return NextResponse.json({message: error.message}, {status: 500});
     }
 };

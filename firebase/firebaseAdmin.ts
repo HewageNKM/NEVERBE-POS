@@ -52,6 +52,20 @@ export const getInventory = async (page: number = 1, size: number = 20) => {
     }
 }
 
+export const getPosCart = async () => {
+    try {
+        const posCartCollection = adminFirestore.collection("posCart");
+        console.log("Attempting to retrieve POS cart...");
+        const cartSnapshot = await posCartCollection.get();
+        const cartData = cartSnapshot.docs.map(doc => doc.data() as CartItem);
+        console.log("POS cart retrieved successfully:", cartData);
+        return cartData;
+    } catch (error) {
+        console.error("Error retrieving POS cart:", error);
+        throw error;
+    }
+}
+
 export const addItemToPosCart = async (item: CartItem) => {
     console.log("Attempting to add item to POS cart...");
     const inventoryRef = adminFirestore.collection("inventory").doc(item.itemId);

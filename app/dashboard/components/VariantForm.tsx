@@ -9,7 +9,7 @@ import {Input} from "@/components/ui/input";
 import VariantDisplayCard from "@/app/dashboard/components/VariantDisplayCard";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {reserveItem} from "@/app/actions/invoiceAction";
-import {setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
+import {getPosCartItems, setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
 import {getProducts, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 import {showAlert} from "@/lib/alertSlice/alertSlice";
 
@@ -39,15 +39,15 @@ const VariantForm = () => {
         try {
             dispatch(setIsVariantsFormOpen(false));
             dispatch(setIsInvoiceLoading(true));
-            const status = await reserveItem(newCartItem);
-            dispatch(getProducts({page: currentPage, size: 10}));
-            if (status == 400) {
-                dispatch(showAlert({title: "Item is out of stock", buttonTitle: "OK",showAlert: true}))
-            }
+            await reserveItem(newCartItem);
             onCancel()
         } catch (e) {
             console.error(e);
+            const title: string = e.response?.data?.message || "An error occurred";
+            dispatch(showAlert({buttonTitle: "Okay", title: title, showAlert: true}))
         } finally {
+            dispatch(getProducts({page: currentPage, size: 10}));
+            dispatch(getPosCartItems());
             dispatch(setIsInvoiceLoading(false));
         }
     }
