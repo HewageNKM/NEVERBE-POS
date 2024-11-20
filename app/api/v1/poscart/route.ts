@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import {addItemToPosCart, removeFromPostCart} from "@/firebase/firebaseAdmin";
+import {addItemToPosCart, removeFromPosCart} from "@/firebase/firebaseAdmin";
 import {CartItem} from "@/interfaces";
 
 export const POST = async (req: NextRequest) => {
@@ -18,8 +18,7 @@ export const POST = async (req: NextRequest) => {
         await addItemToPosCart(json);
         return NextResponse.json("POST request received");
     } catch (error) {
-        console.error("An error occurred while processing the GET request:", error);
-        if(error.message === 'Insufficient Stock') {
+        if(error.message === 'Insufficient stock') {
             return NextResponse.json({message: 'Insufficient Stock'}, {status: 400});
         }
         return NextResponse.json({message: 'Internal Server Error'}, {status: 500});
@@ -38,10 +37,9 @@ export const DELETE = async (req: NextRequest) => {
         console.log("Authorization successful.");
         const json:CartItem = await req.json();
         console.log("DELETE request received:", json);
-        await removeFromPostCart(json);
+        await removeFromPosCart(json);
         return NextResponse.json("POST request received");
     } catch (error) {
-        console.error("An error occurred while processing the GET request:", error);
         return NextResponse.json({message: 'Internal Server Error'}, {status: 500});
     }
 };

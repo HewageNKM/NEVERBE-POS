@@ -39,8 +39,8 @@ const VariantForm = () => {
         try {
             dispatch(setIsVariantsFormOpen(false));
             dispatch(setIsInvoiceLoading(true));
-            dispatch(getProducts({page: currentPage, size: 10}));
             const status = await reserveItem(newCartItem);
+            dispatch(getProducts({page: currentPage, size: 10}));
             if (status == 400) {
                 dispatch(showAlert({title: "Item is out of stock", buttonTitle: "OK",showAlert: true}))
             }

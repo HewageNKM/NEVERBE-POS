@@ -54,147 +54,152 @@ export const getInventory = async (page: number = 1, size: number = 20) => {
 
 export const addItemToPosCart = async (item: CartItem) => {
     console.log("Attempting to add item to POS cart...");
+    const inventoryRef = adminFirestore.collection("inventory").doc(item.itemId);
+    const posCartCollection = adminFirestore.collection("posCart");
+
     try {
-        const documentReference = adminFirestore.collection("inventory").doc(item.itemId);
-        const itemDoc = await documentReference.get();
-        if (!itemDoc.exists) {
-            console.warn(`Item with ID ${item.itemId} not found.`);
-            throw new Error('Item not found');
-        }
+        await adminFirestore.runTransaction(async (transaction) => {
+            const itemDoc = await transaction.get(inventoryRef);
 
-        const itemData = itemDoc.data() as Item;
-        const variant = itemData.variants.find(variant => variant.variantId === item.variantId);
-        if (!variant) {
-            console.warn(`Variant with ID ${item.variantId} not found.`);
-            throw new Error('Variant not found');
-        }
-
-        const size = variant?.sizes.find(size => size.size === item.size);
-        if (!size) {
-            console.warn(`Size ${item.size} not found.`);
-            throw new Error('Size not found');
-        }
-
-        if (size.stock < item.quantity) {
-            console.warn(`Insufficient stock. Requested: ${item.quantity}, Available: ${size.stock}`);
-            throw Error("Insufficient Stock");
-        }
-
-        console.log(`Sufficient stock found. Deducted ${item.quantity} units from stock.`);
-
-        // Update inventory
-        const updatedVariants = itemData.variants.map(variant => {
-            if (variant.variantId === item.variantId) {
-                return {
-                    ...variant,
-                    sizes: variant.sizes.map(size => {
-                        if (size.size === item.size) {
-                            return {
-                                ...size,
-                                stock: size.stock - item.quantity
-                            }
-                        }
-                        return size;
-                    })
-                }
+            if (!itemDoc.exists) {
+                console.warn(`Item with ID ${item.itemId} not found.`);
+                throw new Error("Item not found");
             }
-            return variant;
+
+            const itemData = itemDoc.data() as Item;
+            const variant = itemData.variants.find(variant => variant.variantId === item.variantId);
+            if (!variant) {
+                console.warn(`Variant with ID ${item.variantId} not found.`);
+                throw new Error("Variant not found");
+            }
+
+            const size = variant?.sizes.find(size => size.size === item.size);
+            if (!size) {
+                console.warn(`Size ${item.size} not found.`);
+                throw new Error("Size not found");
+            }
+
+            if (size.stock < item.quantity) {
+                console.warn(`Insufficient stock. Requested: ${item.quantity}, Available: ${size.stock}`);
+                throw new Error("Insufficient stock");
+            }
+
+            // Deduct stock
+            const updatedVariants = itemData.variants.map(variant => {
+                if (variant.variantId === item.variantId) {
+                    return {
+                        ...variant,
+                        sizes: variant.sizes.map(size => {
+                            if (size.size === item.size) {
+                                return { ...size, stock: size.stock - item.quantity };
+                            }
+                            return size;
+                        }),
+                    };
+                }
+                return variant;
+            });
+            transaction.update(inventoryRef, { variants: updatedVariants });
+
+            // Check for existing cart item
+            const cartQuery = await posCartCollection
+                .where("itemId", "==", item.itemId)
+                .where("variantId", "==", item.variantId)
+                .where("size", "==", item.size)
+                .limit(1)
+                .get();
+
+            if (!cartQuery.empty) {
+                // Update quantity of existing cart item
+                const cartDoc = cartQuery.docs[0];
+                const existingCartItem = cartDoc.data() as CartItem;
+                transaction.update(cartDoc.ref, {
+                    quantity: existingCartItem.quantity + item.quantity,
+                });
+                console.log(`Updated quantity for cart item. New Quantity: ${existingCartItem.quantity + item.quantity}`);
+            } else {
+                // Add new cart item
+                transaction.create(posCartCollection.doc(), item);
+                console.log("New item added to POS cart:", item);
+            }
         });
 
-        await documentReference.update({variants: updatedVariants});
-        // Check if the item already exists in posCart
-        const cartQuery = await adminFirestore
-            .collection("posCart")
-            .where("itemId", "==", item.itemId)
-            .where("variantId", "==", item.variantId)
-            .where("size", "==", item.size)
-            .get();
-
-        if (!cartQuery.empty) {
-            // If the item exists, update the quantity
-            const existingCartDoc = cartQuery.docs[0];
-            const existingCartItem = existingCartDoc.data() as CartItem;
-
-            const newQuantity = existingCartItem.quantity + item.quantity;
-
-            await existingCartDoc.ref.update({quantity: newQuantity});
-            console.log(`Updated quantity for existing cart item: New Quantity: ${newQuantity}`);
-        } else {
-            // If the item doesn't exist, add a new cart item
-            await adminFirestore.collection("posCart").add(item);
-            console.log("Item added to POS cart successfully:", item);
-        }
-        console.log("Item added to POS cart and inventory updated successfully:", item);
+        console.log("Item successfully added to POS cart and inventory updated.");
     } catch (error) {
-        console.error("Error adding item to POS cart:", error);
-        throw error;
+        console.error("Error adding item to POS cart:", error.message);
+        throw new Error(error.message);
     }
 };
 
-export const removeFromPostCart = async (item: CartItem) => {
+
+export const removeFromPosCart = async (item: CartItem) => {
     console.log("Attempting to remove item from POS cart...");
+    const inventoryRef = adminFirestore.collection("inventory").doc(item.itemId);
+    const posCartCollection = adminFirestore.collection("posCart");
+
     try {
-        const documentReference = adminFirestore.collection("inventory").doc(item.itemId);
-        const itemDoc = await documentReference.get();
-        if (!itemDoc.exists) {
-            console.warn(`Item with ID ${item.itemId} not found.`);
-            throw new Error('Item not found');
-        }
+        await adminFirestore.runTransaction(async (transaction) => {
+            const itemDoc = await transaction.get(inventoryRef);
 
-        const itemData = itemDoc.data() as Item;
-        const variant = itemData.variants.find(variant => variant.variantId === item.variantId);
-        if (!variant) {
-            console.warn(`Variant with ID ${item.variantId} not found.`);
-            throw new Error('Variant not found');
-        }
+            if (!itemDoc.exists) {
+                console.warn(`Item with ID ${item.itemId} not found.`);
+                throw new Error("Item not found");
+            }
 
-        const size = variant?.sizes.find(size => size.size === item.size);
-        if (!size) {
-            console.warn(`Size ${item.size} not found.`);
-            throw new Error('Size not found');
-        }
+            const itemData = itemDoc.data() as Item;
+            const variant = itemData.variants.find(variant => variant.variantId === item.variantId);
+            if (!variant) {
+                console.warn(`Variant with ID ${item.variantId} not found.`);
+                throw new Error("Variant not found");
+            }
 
-        // Update inventory
-        const updatedVariants = itemData.variants.map(variant => {
-            if (variant.variantId === item.variantId) {
-                return {
-                    ...variant,
-                    sizes: variant.sizes.map(size => {
-                        if (size.size === item.size) {
-                            return {
-                                ...size,
-                                stock: size.stock + item.quantity
+            const size = variant?.sizes.find(size => size.size === item.size);
+            if (!size) {
+                console.warn(`Size ${item.size} not found.`);
+                throw new Error("Size not found");
+            }
+
+            // Restore stock
+            const updatedVariants = itemData.variants.map(variant => {
+                if (variant.variantId === item.variantId) {
+                    return {
+                        ...variant,
+                        sizes: variant.sizes.map(size => {
+                            if (size.size === item.size) {
+                                return { ...size, stock: size.stock + item.quantity };
                             }
-                        }
-                        return size;
-                    })
+                            return size;
+                        }),
+                    };
                 }
+                return variant;
+            });
+            transaction.update(inventoryRef, { variants: updatedVariants });
+
+            // Delete matching cart items
+            const cartQuery = await posCartCollection
+                .where("itemId", "==", item.itemId)
+                .where("variantId", "==", item.variantId)
+                .where("size", "==", item.size)
+                .limit(1)
+                .get();
+
+            if (!cartQuery.empty) {
+                const cartDoc = cartQuery.docs[0];
+                transaction.delete(cartDoc.ref);
+                console.log(`Cart item deleted: ${cartDoc.id}`);
+            } else {
+                console.warn("No matching cart item found.");
             }
-            return variant;
         });
 
-        console.log("Checking for matching items in POS cart...");
-        const querySnapshot = await adminFirestore.collection("posCart").get();
-
-        const deletePromises = [];
-        querySnapshot.forEach(doc => {
-            const posCartItem = doc.data();
-            if (posCartItem.itemId === item.itemId && posCartItem.variantId === item.variantId && posCartItem.size === item.size) {
-                console.log(`Found matching item in POS cart. Deleting document ID: ${doc.id}`);
-                deletePromises.push(doc.ref.delete());
-            }
-        });
-
-        await adminFirestore.collection("inventory").doc(item.itemId).update({variants: updatedVariants});
-        // Wait for all deletions to complete
-        await Promise.all(deletePromises);
-        console.log("Matching items removed from POS cart.");
-        console.log("Item removed from POS cart and inventory updated successfully:", item);
+        console.log("Item successfully removed from POS cart and inventory updated.");
     } catch (error) {
-        console.error("Error removing item from POS cart:", error);
-        throw error;
+        console.error("Error removing item from POS cart:", error.message);
+        throw new Error(error.message);
     }
 };
+
 
 export const verifyIdToken = async (token: string) => {
     console.log("Attempting to verify token...");
