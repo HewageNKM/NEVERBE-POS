@@ -1,4 +1,4 @@
-import {CartItem} from "@/interfaces";
+import {CartItem, Order} from "@/interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {getPosCart} from "@/app/actions/invoiceAction";
 import {uuidv4} from "@firebase/util";
@@ -9,11 +9,13 @@ interface InvoiceSlice {
     showPaymentDialog: boolean,
     isInvoiceLoading: boolean,
     previewInvoice: boolean
+    previewOrder: Order | null
 }
 
 const initialState: InvoiceSlice = {
     previewInvoice: false,
     invoiceId: null,
+    previewOrder: null,
     isInvoiceLoading: false,
     showPaymentDialog: false,
     items: []
@@ -35,6 +37,7 @@ export const invoiceSlice = createSlice({
         setPreviewInvoice: (state, action: PayloadAction<boolean>) => {
             state.previewInvoice = action.payload
         },
+
         initializeInvoicedId: (state) => {
             let invoiceId = window.localStorage.getItem("posInvoiceId");
             if (invoiceId == null) {
@@ -42,7 +45,15 @@ export const invoiceSlice = createSlice({
                 window.localStorage.setItem("posInvoiceId", invoiceId);
             }
             state.invoiceId = invoiceId;
-        }
+        },
+        setPreviewOrder: (state, action: PayloadAction<Order>) => {
+            state.previewOrder = action.payload
+            state.previewInvoice = true
+        },
+        clearPreviewOrder: (state) => {
+            state.previewOrder = null
+            state.previewInvoice = false
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(getPosCartItems.pending, (state) => {
@@ -64,5 +75,13 @@ export const getPosCartItems = createAsyncThunk('invoice/getPosCartItems', async
         return thunkAPI.rejectWithValue(e.response);
     }
 });
-export const {setItems, setIsInvoiceLoading, setShowPaymentDialog, setPreviewInvoice, initializeInvoicedId} = invoiceSlice.actions
+export const {
+    setItems,
+    clearPreviewOrder,
+    setIsInvoiceLoading,
+    setShowPaymentDialog,
+    setPreviewInvoice,
+    setPreviewOrder,
+    initializeInvoicedId,
+} = invoiceSlice.actions
 export default invoiceSlice.reducer

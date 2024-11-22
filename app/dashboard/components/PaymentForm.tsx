@@ -2,7 +2,12 @@
 import React, {useState} from "react";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {setPreviewInvoice, setShowPaymentDialog} from "@/lib/invoiceSlice/invoiceSlice";
+import {
+    getPosCartItems,
+    initializeInvoicedId,
+    setPreviewOrder,
+    setShowPaymentDialog
+} from "@/lib/invoiceSlice/invoiceSlice";
 import {Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
@@ -10,14 +15,20 @@ import {Input} from "@/components/ui/input";
 import {PaymentMethods} from "@/constant";
 import {Order, OrderItem, Payment} from "@/interfaces";
 import {addOrder} from "@/app/actions/invoiceAction";
+import {useToast} from "@/hooks/use-toast";
+import LoadingScreen from "@/components/LoadingScreen";
+import {getProducts} from "@/lib/prodcutSlice/productSlice";
 
 
 const PaymentForm = () => {
     const dispatch = useAppDispatch();
-    const {items,invoiceId,showPaymentDialog} = useAppSelector((state) => state.invoice);
+    const {items, invoiceId, showPaymentDialog} = useAppSelector((state) => state.invoice);
+    const {currentSize, currentPage} = useAppSelector((state) => state.product);
     const [payments, setPayments] = useState([] as Payment[]);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Cash");
     const [paymentAmount, setPaymentAmount] = useState("");
+    const [loading, setLoading] = useState(false)
+    const {toast} = useToast()
 
     const getTotal = () => {
         return payments.map((invoice) => invoice.amount).reduce((acc, curr) => acc + curr, 0);
@@ -30,7 +41,11 @@ const PaymentForm = () => {
     const addPayment = () => {
         const amount = parseFloat(paymentAmount);
         if (isNaN(amount) || amount <= 0) {
-            alert("Please enter a valid payment amount.");
+            toast({
+                title: "Invalid Amount",
+                description: "Please enter a valid amount.",
+                variant: "default",
+            })
             return;
         }
 
@@ -38,9 +53,11 @@ const PaymentForm = () => {
 
         // Validate payment amount based on the selected payment method
         if (["Card", "Bank Transfer", "QR"].includes(selectedPaymentMethod) && amount > dueAmount) {
-            alert(
-                `${selectedPaymentMethod} payment cannot exceed the due amount of LKR ${dueAmount}.`
-            );
+            toast({
+                title: "Invalid Amount",
+                description: "Amount exceeds due amount.",
+                variant: "default",
+            });
             return;
         }
 
@@ -55,6 +72,7 @@ const PaymentForm = () => {
 
 
     const placeOrder = async () => {
+        setLoading(true)
         try {
             const orderItems: OrderItem[] = items.map((item) => ({
                 itemId: item.itemId,
@@ -73,13 +91,25 @@ const PaymentForm = () => {
                 paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
                 paymentStatus: "Paid",
                 shippingCost: 0,
-                from:"Store",
+                from: "Store",
             }
             await addOrder(newOrder);
+
             dispatch(setShowPaymentDialog(false));
-            dispatch(setPreviewInvoice(true));
+            dispatch(setPreviewOrder(newOrder))
+            window.localStorage.removeItem("posInvoiceId");
+            dispatch(initializeInvoicedId());
+            dispatch(getPosCartItems());
+            dispatch(getProducts({size: currentSize, page: currentPage}))
         } catch (e) {
             console.error(e);
+            toast({
+                title: "Fail to place order",
+                description: e.message,
+                variant: "destructive"
+            })
+        } finally {
+            setLoading(false)
         }
     }
     return (
@@ -90,7 +120,7 @@ const PaymentForm = () => {
                 setPayments([]);
             }}
         >
-            <DialogContent className="sm:max-w-md md:max-w-lg">
+            {loading ? (<LoadingScreen type={"page"}/>) : (<DialogContent className="sm:max-w-md md:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold">Payments</DialogTitle>
                 </DialogHeader>
@@ -187,9 +217,10 @@ const PaymentForm = () => {
                         Confirm
                     </Button>
                 </DialogFooter>
-            </DialogContent>
+            </DialogContent>)}
         </Dialog>
     );
 };
 
 export default PaymentForm;
+

@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
+import {addNewOrder} from "@/firebase/firebaseAdmin";
 
 export const POST = async (req: NextRequest) => {
     try {
@@ -10,7 +11,10 @@ export const POST = async (req: NextRequest) => {
             console.warn("Authorization failed. Responding with 401 Unauthorized.");
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
-
+        console.log("Authorization successful.");
+        const json = await req.json();
+        await addNewOrder(json);
+        return NextResponse.json("POST request received");
     } catch (error) {
         return NextResponse.json({message: error.message}, {status: 500});
     }

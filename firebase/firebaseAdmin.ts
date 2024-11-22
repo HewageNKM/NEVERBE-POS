@@ -1,7 +1,5 @@
 import admin, {credential} from 'firebase-admin';
 import {CartItem, Item, Order} from "@/interfaces";
-import {timestamp} from "yaml/dist/schema/yaml-1.1/timestamp";
-import {Timestamp} from "@firebase/firestore";
 
 // Initialize Firebase Admin SDK if it hasn't been initialized already
 if (!admin.apps.length) {
@@ -32,25 +30,49 @@ export const getUserById = async (uid: string) => {
         throw error;
     }
 };
-export const addNewOrder = async (order: CartItem[]) => {
+import { getFirestore } from "firebase-admin/firestore";
+
+export const addNewOrder = async (order: Order) => {
     console.log("Attempting to add new order...");
-    const ordersCollection = adminFirestore.collection("orders");
+    const db = getFirestore();
+
     try {
-        await adminFirestore.runTransaction(async (transaction) => {
-            const orderDoc = ordersCollection.doc();
-            const orderData:Order = {
-                ...order,
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now(),
-            };
-            transaction.create(orderDoc, orderData);
+        await db.runTransaction(async (transaction) => {
+            const ordersCollection = db.collection("orders");
+            const orderRef = ordersCollection.doc(order.orderId);
+
+            // Check if the order already exists
+            const existingOrder = await transaction.get(orderRef);
+            if (existingOrder.exists) {
+                throw new Error(`Order with ID ${order.orderId} already exists.`);
+            }
+
+            // Add the new order to the collection
+            transaction.set(orderRef, order);
         });
+
         console.log("New order added successfully.");
+
+        // Delete all documents in the posCart collection
+        const posCartSnapshot = await db.collection("posCart").get();
+        if (!posCartSnapshot.empty) {
+            const batch = db.batch();
+            posCartSnapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+            console.log("All records from posCart collection deleted successfully.");
+        } else {
+            console.log("posCart collection is empty, no records to delete.");
+        }
     } catch (error) {
         console.error("Error adding new order:", error);
         throw error;
     }
 };
+
+
 export const getInventory = async (page: number = 1, size: number = 20) => {
     console.log("Attempting to retrieve inventory...");
     try {
@@ -125,7 +147,7 @@ export const addItemToPosCart = async (item: CartItem) => {
                         ...variant,
                         sizes: variant.sizes.map(size => {
                             if (size.size === item.size) {
-                                return { ...size, stock: size.stock - item.quantity };
+                                return {...size, stock: size.stock - item.quantity};
                             }
                             return size;
                         }),
@@ -133,7 +155,7 @@ export const addItemToPosCart = async (item: CartItem) => {
                 }
                 return variant;
             });
-            transaction.update(inventoryRef, { variants: updatedVariants });
+            transaction.update(inventoryRef, {variants: updatedVariants});
 
             // Check for existing cart item
             const cartQuery = await posCartCollection
@@ -200,7 +222,7 @@ export const removeFromPosCart = async (item: CartItem) => {
                         ...variant,
                         sizes: variant.sizes.map(size => {
                             if (size.size === item.size) {
-                                return { ...size, stock: size.stock + item.quantity };
+                                return {...size, stock: size.stock + item.quantity};
                             }
                             return size;
                         }),
@@ -208,7 +230,7 @@ export const removeFromPosCart = async (item: CartItem) => {
                 }
                 return variant;
             });
-            transaction.update(inventoryRef, { variants: updatedVariants });
+            transaction.update(inventoryRef, {variants: updatedVariants});
 
             // Delete matching cart items
             const cartQuery = await posCartCollection

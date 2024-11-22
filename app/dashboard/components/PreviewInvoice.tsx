@@ -4,7 +4,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {Button} from "@/components/ui/button";
 import {useAppDispatch} from "@/lib/hooks";
 import {BreakLine, CharacterSet, PrinterTypes, ThermalPrinter} from "node-thermal-printer";
-import {setPreviewInvoice} from "@/lib/invoiceSlice/invoiceSlice";
+import {clearPreviewOrder, setPreviewInvoice} from "@/lib/invoiceSlice/invoiceSlice";
 import {CartItem} from "@/interfaces";
 
 export default function InvoicePreview({items, invoiceId, previewInvoice}: {
@@ -71,12 +71,15 @@ export default function InvoicePreview({items, invoiceId, previewInvoice}: {
         } catch (e) {
             console.error(e);
         } finally {
-            dispatch(setPreviewInvoice(false));
+            clearOrder()
         }
     };
-
+    const clearOrder = () => {
+        dispatch(setPreviewInvoice(false));
+        dispatch(clearPreviewOrder());
+    }
     return (
-        <Dialog open={previewInvoice} onOpenChange={() => dispatch(setPreviewInvoice(false))}>
+        <Dialog open={previewInvoice} onOpenChange={() => clearOrder()}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>

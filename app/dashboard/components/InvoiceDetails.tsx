@@ -12,7 +12,14 @@ import PaymentForm from "@/app/dashboard/components/PaymentForm";
 import InvoicePreview from "@/app/dashboard/components/PreviewInvoice";
 
 const InvoiceDetails = () => {
-    const {items, isInvoiceLoading, showPaymentDialog, previewInvoice, invoiceId} = useAppSelector((state) => state.invoice);
+    const {
+        items,
+        isInvoiceLoading,
+        showPaymentDialog,
+        previewInvoice,
+        invoiceId,
+        previewOrder
+    } = useAppSelector((state) => state.invoice);
     const dispatch = useAppDispatch();
     const {user} = useAppSelector((state) => state.auth);
 
@@ -83,7 +90,7 @@ const InvoiceDetails = () => {
                 </Button>
             </div>
             {showPaymentDialog && (<PaymentForm/>)}
-            {previewInvoice && (<InvoicePreview invoiceId={invoiceId} previewInvoice={previewInvoice} items={items}/>)}
+            <InvoicePreview invoiceId={previewOrder?.orderId} previewInvoice={previewInvoice} items={previewOrder?.items}/>
         </div>
     );
 };

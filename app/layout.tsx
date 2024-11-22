@@ -3,13 +3,14 @@ import "./globals.css";
 import StoreProvider from "@/app/StoreProvider";
 import GlobalProvider from "@/components/GlobalProvider";
 import {ThemeProvider} from "@/app/ThemeProvider";
+import {Toaster} from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
     title: {
-        template: `%s | NEVERBE POS`,
-        default: "NEVERBE POS",
+        template: `%s | POS`,
+        default: "POS",
     },
-    description: "NEVERBE POS",
+    description: "POS",
 };
 
 export default function RootLayout({
@@ -29,6 +30,7 @@ export default function RootLayout({
                     disableTransitionOnChange={false}
                 >
                     {children}
+                    <Toaster />
                 </ThemeProvider>
             </GlobalProvider>
         </StoreProvider>
