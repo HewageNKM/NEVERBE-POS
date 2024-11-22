@@ -72,7 +72,21 @@ export const addNewOrder = async (order: Order) => {
     }
 };
 
-
+export const getAOrder = async (orderId: string) => {
+    console.log(`Attempting to retrieve order with ID: ${orderId}`);
+    try {
+        const order = await adminFirestore.collection('orders').doc(orderId).get();
+        if (!order.exists) {
+            console.warn(`Order with ID ${orderId} not found.`);
+            new Error('Order not found');
+        }
+        console.log(`Order with ID ${orderId} retrieved successfully.`);
+        return order.data() as Order;
+    } catch (error) {
+        console.error(`Error retrieving order with ID ${orderId}:`, error);
+        throw error;
+    }
+};
 export const getInventory = async (page: number = 1, size: number = 20) => {
     console.log("Attempting to retrieve inventory...");
     try {

@@ -69,3 +69,19 @@ export const addOrder = async (order: Order) => {
         throw e
     }
 }
+
+export const getAOrder = async (orderId: string) => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await axios({
+            method: 'GET',
+            url: `/api/v1/orders/${orderId}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    } catch (e) {
+        throw e;
+    }
+}

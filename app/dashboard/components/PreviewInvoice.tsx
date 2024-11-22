@@ -7,10 +7,12 @@ import {BreakLine, CharacterSet, PrinterTypes, ThermalPrinter} from "node-therma
 import {clearPreviewOrder, setPreviewInvoice} from "@/lib/invoiceSlice/invoiceSlice";
 import {CartItem} from "@/interfaces";
 
-export default function InvoicePreview({items, invoiceId, previewInvoice}: {
+export default function InvoicePreview({items, invoiceId, previewInvoice, hidePreview, resetOrder}: {
     items: CartItem[],
     previewInvoice: boolean,
-    invoiceId: string
+    invoiceId: string,
+    resetOrder?: () => void,
+    hidePreview?: () => void
 }) {
     const dispatch = useAppDispatch();
 
@@ -77,6 +79,13 @@ export default function InvoicePreview({items, invoiceId, previewInvoice}: {
     const clearOrder = () => {
         dispatch(setPreviewInvoice(false));
         dispatch(clearPreviewOrder());
+
+        if (hidePreview) {
+            hidePreview();
+        }
+        if (resetOrder) {
+            resetOrder()
+        }
     }
     return (
         <Dialog open={previewInvoice} onOpenChange={() => clearOrder()}>
