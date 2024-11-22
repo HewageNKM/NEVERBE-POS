@@ -8,6 +8,7 @@ import {setUser} from "@/lib/authSlice/authSlice";
 import {User} from "@/interfaces";
 import {RootState} from "@/lib/store";
 import {useRouter} from "next/navigation";
+import {initializeInvoicedId} from "@/lib/invoiceSlice/invoiceSlice";
 
 const GlobalProvider = ({children}: { children: ReactNode }) => {
     const dispatch = useAppDispatch();
@@ -40,6 +41,7 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
     }, [authUser, dispatch, router]);
 
     useEffect(() => {
+        dispatch(initializeInvoicedId());
         const user = window.localStorage.getItem('neverPosUser');
         if (user) {
             dispatch(setUser(JSON.parse(user)));

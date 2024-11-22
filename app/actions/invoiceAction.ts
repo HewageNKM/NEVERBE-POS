@@ -1,4 +1,4 @@
-import {CartItem} from "@/interfaces";
+import {CartItem, Order} from "@/interfaces";
 import axios from "axios";
 import {auth} from "@/firebase/firebaseClient";
 
@@ -50,5 +50,22 @@ export const getPosCart = async () => {
         return res.data;
     } catch (e) {
         throw e;
+    }
+}
+
+export const addOrder = async (order: Order) => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+        return await axios({
+            method: 'POST',
+            url: '/api/v1/orders',
+            data: JSON.stringify(order),
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+    } catch (e) {
+        throw e
     }
 }

@@ -1,44 +1,22 @@
 "use client";
-import React, { useState } from "react";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { setShowPaymentDialog } from "@/lib/invoiceSlice/invoiceSlice";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import React, {useState} from "react";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {setPreviewInvoice, setShowPaymentDialog} from "@/lib/invoiceSlice/invoiceSlice";
+import {Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Button} from "@/components/ui/button";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Input} from "@/components/ui/input";
+import {PaymentMethods} from "@/constant";
+import {Order, OrderItem, Payment} from "@/interfaces";
+import {addOrder} from "@/app/actions/invoiceAction";
 
-interface Payment {
-    id: string;
-    amount: number;
-    paymentMethod: string;
-}
 
 const PaymentForm = () => {
     const dispatch = useAppDispatch();
-    const { showPaymentDialog, items } = useAppSelector((state) => state.invoice);
+    const {items,invoiceId,showPaymentDialog} = useAppSelector((state) => state.invoice);
     const [payments, setPayments] = useState([] as Payment[]);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cash");
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Cash");
     const [paymentAmount, setPaymentAmount] = useState("");
 
     const getTotal = () => {
@@ -56,8 +34,18 @@ const PaymentForm = () => {
             return;
         }
 
+        const dueAmount = getItemsTotal() - getTotal();
+
+        // Validate payment amount based on the selected payment method
+        if (["Card", "Bank Transfer", "QR"].includes(selectedPaymentMethod) && amount > dueAmount) {
+            alert(
+                `${selectedPaymentMethod} payment cannot exceed the due amount of LKR ${dueAmount}.`
+            );
+            return;
+        }
+
         const newPayment: Payment = {
-            id: `${Date.now()}`.substring(9,11), // Unique ID based on timestamp
+            id: `${Date.now()}`.substring(9, 11), // Unique ID based on timestamp
             amount,
             paymentMethod: selectedPaymentMethod,
         };
@@ -65,6 +53,35 @@ const PaymentForm = () => {
         setPaymentAmount(""); // Reset input
     };
 
+
+    const placeOrder = async () => {
+        try {
+            const orderItems: OrderItem[] = items.map((item) => ({
+                itemId: item.itemId,
+                variantId: item.variantId,
+                name: item.name,
+                variantName: item.variantName,
+                size: item.size,
+                quantity: item.quantity,
+                price: item.price,
+            }));
+
+            const newOrder: Order = {
+                items: orderItems,
+                orderId: invoiceId || "",
+                paymentId: "None",
+                paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
+                paymentStatus: "Paid",
+                shippingCost: 0,
+                from:"Store",
+            }
+            await addOrder(newOrder);
+            dispatch(setShowPaymentDialog(false));
+            dispatch(setPreviewInvoice(true));
+        } catch (e) {
+            console.error(e);
+        }
+    }
     return (
         <Dialog
             open={showPaymentDialog}
@@ -122,12 +139,14 @@ const PaymentForm = () => {
                             onValueChange={(value) => setSelectedPaymentMethod(value)}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select Payment Method" />
+                                <SelectValue placeholder="Select Payment Method"/>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="card">Card</SelectItem>
-                                <SelectItem value="cash">Cash</SelectItem>
-                                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                                {PaymentMethods.map((method) => (
+                                    <SelectItem key={method.value} value={method.value}>
+                                        {method.label}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                         <Input
@@ -163,10 +182,7 @@ const PaymentForm = () => {
                     </Button>
                     <Button
                         disabled={getTotal() < getItemsTotal()}
-                        onClick={() => {
-                            alert("Payments confirmed!");
-                            dispatch(setShowPaymentDialog(false));
-                        }}
+                        onClick={() => placeOrder()}
                     >
                         Confirm
                     </Button>

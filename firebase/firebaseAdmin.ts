@@ -1,5 +1,7 @@
 import admin, {credential} from 'firebase-admin';
-import {CartItem, Item} from "@/interfaces";
+import {CartItem, Item, Order} from "@/interfaces";
+import {timestamp} from "yaml/dist/schema/yaml-1.1/timestamp";
+import {Timestamp} from "@firebase/firestore";
 
 // Initialize Firebase Admin SDK if it hasn't been initialized already
 if (!admin.apps.length) {
@@ -30,7 +32,25 @@ export const getUserById = async (uid: string) => {
         throw error;
     }
 };
-
+export const addNewOrder = async (order: CartItem[]) => {
+    console.log("Attempting to add new order...");
+    const ordersCollection = adminFirestore.collection("orders");
+    try {
+        await adminFirestore.runTransaction(async (transaction) => {
+            const orderDoc = ordersCollection.doc();
+            const orderData:Order = {
+                ...order,
+                createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now(),
+            };
+            transaction.create(orderDoc, orderData);
+        });
+        console.log("New order added successfully.");
+    } catch (error) {
+        console.error("Error adding new order:", error);
+        throw error;
+    }
+};
 export const getInventory = async (page: number = 1, size: number = 20) => {
     console.log("Attempting to retrieve inventory...");
     try {

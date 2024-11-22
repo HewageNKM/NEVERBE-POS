@@ -1,3 +1,5 @@
+import {Timestamp} from "@firebase/firestore";
+
 export interface Item {
     itemId: string,
     type: string,
@@ -11,6 +13,12 @@ export interface Item {
     name: string,
     sellingPrice: number,
     discount: number,
+}
+
+export interface Payment {
+    id: string;
+    amount: number;
+    paymentMethod: string;
 }
 
 export interface Size {
@@ -48,6 +56,16 @@ export interface OrderItem {
     size: string,
     quantity: number,
     price: number,
+}
+
+export interface Order {
+    orderId: string,
+    paymentId: string,
+    items: OrderItem[],
+    paymentStatus: string,
+    paymentMethod: string,
+    shippingCost: number,
+    from: string,
 }
 
 export interface User {

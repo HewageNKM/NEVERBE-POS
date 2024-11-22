@@ -9,9 +9,10 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import LoadingScreen from "@/components/LoadingScreen";
 import {getPosCartItems, setShowPaymentDialog} from "@/lib/invoiceSlice/invoiceSlice";
 import PaymentForm from "@/app/dashboard/components/PaymentForm";
+import InvoicePreview from "@/app/dashboard/components/PreviewInvoice";
 
 const InvoiceDetails = () => {
-    const {items, isInvoiceLoading,showPaymentDialog} = useAppSelector((state) => state.invoice);
+    const {items, isInvoiceLoading, showPaymentDialog, previewInvoice, invoiceId} = useAppSelector((state) => state.invoice);
     const dispatch = useAppDispatch();
     const {user} = useAppSelector((state) => state.auth);
 
@@ -32,7 +33,6 @@ const InvoiceDetails = () => {
             console.error(e);
         }
     }
-
     return (
         <div className="flex pt-1 px-2 relative items-center w-full min-h-[93vh] col-span-2 flex-col">
             <div className="flex flex-col w-full gap-5">
@@ -43,8 +43,9 @@ const InvoiceDetails = () => {
             </div>
             <h1 className="text-2xl font-bold mt-5">Invoice Details</h1>
             <div className="mt-2 w-full flex flex-col">
-                <div className="flex justify-end">
-                    <h1 className="text-lg font-bold">Invoices: 0</h1>
+                <div className="flex justify-between">
+                    <h2 className="text-lg font-bold">Invoice #: <span className="uppercase">{invoiceId}</span></h2>
+                    <h2 className="text-lg font-bold">Invoices: 0</h2>
                 </div>
                 <div className="border-t-2 w-full"/>
             </div>
@@ -76,11 +77,13 @@ const InvoiceDetails = () => {
             </span>
                     </div>
                 </div>
-                <Button onClick={()=>dispatch(setShowPaymentDialog(true))} disabled={items.length == 0} className="w-full mt-2 text-lg disabled:cursor-not-allowed disabled:bg-opacity-60 font-medium">
+                <Button onClick={() => dispatch(setShowPaymentDialog(true))} disabled={items.length == 0}
+                        className="w-full mt-2 text-lg disabled:cursor-not-allowed disabled:bg-opacity-60 font-medium">
                     Place Order
                 </Button>
             </div>
-            {showPaymentDialog && (<PaymentForm />)}
+            {showPaymentDialog && (<PaymentForm/>)}
+            {previewInvoice && (<InvoicePreview invoiceId={invoiceId} previewInvoice={previewInvoice} items={items}/>)}
         </div>
     );
 };

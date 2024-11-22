@@ -1,14 +1,19 @@
 import {CartItem} from "@/interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {getPosCart} from "@/app/actions/invoiceAction";
+import {uuidv4} from "@firebase/util";
 
 interface InvoiceSlice {
     items: CartItem[],
+    invoiceId: string | null,
     showPaymentDialog: boolean,
-    isInvoiceLoading: boolean
+    isInvoiceLoading: boolean,
+    previewInvoice: boolean
 }
 
 const initialState: InvoiceSlice = {
+    previewInvoice: false,
+    invoiceId: null,
     isInvoiceLoading: false,
     showPaymentDialog: false,
     items: []
@@ -26,6 +31,17 @@ export const invoiceSlice = createSlice({
         },
         setShowPaymentDialog: (state, action: PayloadAction<boolean>) => {
             state.showPaymentDialog = action.payload
+        },
+        setPreviewInvoice: (state, action: PayloadAction<boolean>) => {
+            state.previewInvoice = action.payload
+        },
+        initializeInvoicedId: (state) => {
+            let invoiceId = window.localStorage.getItem("posInvoiceId");
+            if (invoiceId == null) {
+                invoiceId = uuidv4().replace(/-/g, '').substring(0, 5);
+                window.localStorage.setItem("posInvoiceId", invoiceId);
+            }
+            state.invoiceId = invoiceId;
         }
     },
     extraReducers: (builder) => {
@@ -48,5 +64,5 @@ export const getPosCartItems = createAsyncThunk('invoice/getPosCartItems', async
         return thunkAPI.rejectWithValue(e.response);
     }
 });
-export const {setItems, setIsInvoiceLoading, setShowPaymentDialog} = invoiceSlice.actions
+export const {setItems, setIsInvoiceLoading, setShowPaymentDialog, setPreviewInvoice, initializeInvoicedId} = invoiceSlice.actions
 export default invoiceSlice.reducer
