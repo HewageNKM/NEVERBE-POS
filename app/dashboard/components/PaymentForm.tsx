@@ -44,7 +44,7 @@ const PaymentForm = () => {
             toast({
                 title: "Invalid Amount",
                 description: "Please enter a valid amount.",
-                variant: "default",
+                variant: "destructive",
             })
             return;
         }
@@ -56,7 +56,7 @@ const PaymentForm = () => {
             toast({
                 title: "Invalid Amount",
                 description: "Amount exceeds due amount.",
-                variant: "default",
+                variant: "destructive",
             });
             return;
         }
@@ -168,10 +168,12 @@ const PaymentForm = () => {
                             value={selectedPaymentMethod}
                             onValueChange={(value) => setSelectedPaymentMethod(value)}
                         >
-                            <SelectTrigger>
+                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}
+                            >
                                 <SelectValue placeholder="Select Payment Method"/>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent
+                            >
                                 {PaymentMethods.map((method) => (
                                     <SelectItem key={method.value} value={method.value}>
                                         {method.label}
@@ -180,12 +182,13 @@ const PaymentForm = () => {
                             </SelectContent>
                         </Select>
                         <Input
+                            className="disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}
                             type="number"
                             placeholder="Enter payment amount"
                             value={paymentAmount}
                             onChange={(e) => setPaymentAmount(e.target.value)}
                         />
-                        <Button className="self-end" onClick={addPayment}>
+                        <Button className="self-end disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}>
                             Add Payment
                         </Button>
                     </div>
