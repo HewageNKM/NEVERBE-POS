@@ -22,6 +22,7 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
                     const usr = await isUserExists(user.uid);
                     if (usr) {
                         dispatch(setUser(usr as User));
+                        dispatch(initializeInvoicedId());
                     }
                 }
             } catch (e) {
@@ -41,7 +42,6 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
     }, [authUser, dispatch, router]);
 
     useEffect(() => {
-        dispatch(initializeInvoicedId());
         const user = window.localStorage.getItem('neverPosUser');
         if (user) {
             dispatch(setUser(JSON.parse(user)));

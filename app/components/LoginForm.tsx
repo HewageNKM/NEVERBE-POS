@@ -30,7 +30,7 @@ const LoginForm = () => {
         try {
             const user = await authenticateUser(data.email, data.password);
             if (user) {
-                router.push('/dashboard');
+                router.replace('/dashboard');
             } else {
                 console.error('Failed to authenticate user');
             }

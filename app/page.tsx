@@ -2,6 +2,7 @@ import LoginForm from "@/app/components/LoginForm";
 import Image from "next/image";
 import {Logo} from "@/assets/images";
 import React from "react";
+import DarkModeSelector from "@/components/DarkModeSelector";
 
 export const metadata = {
     title: "Login",
@@ -9,19 +10,23 @@ export const metadata = {
 }
 export default function Home() {
     return (
-        <main className='min-h-screen w-full flex justify-center items-center'>
-            <div className="md:px-8 px-4 py-4 md:py-4 lg:w-[30vw] md:w-[50vw] w-[95vw] border flex flex-col gap-5 rounded">
+        <main className='min-h-screen w-full flex justify-center relative items-center'>
+            <div
+                className="md:px-8 px-4 py-4 md:py-4 lg:w-[30vw] md:w-[50vw] w-[95vw] border flex flex-col gap-5 rounded">
                 <div className="flex flex-row justify-between flex-wrap-reverse items-center">
                     <div>
                         <h1 className="text-3xl font-bold">Login</h1>
-                        <p className="text-sm text-gray-500">Login to NEVERBE POS</p>
+                        <p className="text-sm text-gray-500">NEVERBE POS</p>
                     </div>
                     <figure>
                         <Image src={Logo} alt="neverbe logo" width={100} height={100}/>
                     </figure>
                 </div>
-                <LoginForm/>
+                <LoginForm />
+            </div>
+            <div className="absolute top-5 right-5">
+                <DarkModeSelector />
             </div>
         </main>
-);
+    );
 }
