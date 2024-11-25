@@ -80,7 +80,7 @@ export const getAOrder = async (orderId: string) => {
                 Authorization: `Bearer ${token}`
             }
         });
-        return res.data;
+        return res.data as Order;
     } catch (e) {
         throw e;
     }

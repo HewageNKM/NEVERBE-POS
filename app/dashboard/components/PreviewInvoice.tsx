@@ -1,81 +1,30 @@
-import React from "react";
-import Invoice from "@/app/dashboard/components/Invoice";
+import React, {useRef} from "react";
+import {CartItem} from "@/interfaces";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {useAppDispatch} from "@/lib/hooks";
-import {BreakLine, CharacterSet, PrinterTypes, ThermalPrinter} from "node-thermal-printer";
 import {clearPreviewOrder, setPreviewInvoice} from "@/lib/invoiceSlice/invoiceSlice";
-import {CartItem} from "@/interfaces";
+import {jsPDF} from "jspdf";
+import html2canvas from "html2canvas";
+import Invoice from "@/app/dashboard/components/Invoice";
+import {fit} from "sharp";
 
-export default function InvoicePreview({items, invoiceId, previewInvoice, hidePreview, resetOrder}: {
-    items: CartItem[],
-    previewInvoice: boolean,
-    invoiceId: string,
-    resetOrder?: () => void,
-    hidePreview?: () => void
+export default function InvoicePreview({
+                                           items,
+                                           invoiceId,
+                                           previewInvoice,
+                                           hidePreview,
+                                           resetOrder,
+                                       }: {
+    items: CartItem[];
+    previewInvoice: boolean;
+    invoiceId: string;
+    resetOrder?: () => void;
+    hidePreview?: () => void;
 }) {
     const dispatch = useAppDispatch();
+    const invoiceRef = useRef<HTMLDivElement>(null);
 
-    const getTotal = () => {
-        return items.map((item) => item.price * item.quantity).reduce((acc, curr) => acc + curr, 0);
-    }
-
-    const printInvoice = async () => {
-        try {
-            const printer = new ThermalPrinter({
-                type: PrinterTypes.EPSON,
-                interface: 'printer:YourPrinterName', // Replace with actual printer name
-                characterSet: CharacterSet.PC437_USA,
-                removeSpecialCharacters: false,
-                breakLine: BreakLine.WORD,
-                width: 48,
-                lineCharacter: "=",
-            });
-
-            printer.alignCenter();
-            printer.println("NEVERBE");
-            printer.println("New Kandy Road, Delgoda");
-            printer.println("+9472624999 +9470528999");
-            printer.println("support@neverbe.lk");
-            printer.alignLeft();
-            printer.drawLine();
-            printer.println(`Date: ${new Date().toLocaleString()}`);
-            printer.println(`Order #: ${invoiceId}`);
-            printer.drawLine();
-            printer.tableCustom([
-                {text: "Item", align: "LEFT", width: 0.5},
-                {text: "Qty", align: "RIGHT", width: 0.25},
-                {text: "Price", align: "RIGHT", width: 0.25}
-            ]);
-            printer.drawLine();
-            items.forEach((item) => {
-                printer.tableCustom([
-                    {text: item.itemId, align: "LEFT", width: 0.5},
-                    {text: item.quantity.toString(), align: "RIGHT", width: 0.25},
-                    {text: item.price.toString(), align: "RIGHT", width: 0.25}
-                ]);
-                printer.tableCustom([
-                    {text: `${item.variantId}/${item.name}/${item.variantName}/${item.size}`, align: "LEFT", width: 1}
-                ]);
-            });
-            printer.drawLine();
-            printer.println(`Subtotal: ${getTotal()}`);
-            printer.println(`Total: ${getTotal()}`);
-            printer.drawLine();
-            printer.alignCenter()
-            printer.println("Thank you for shopping with us!");
-            printer.println("Come again");
-            printer.drawLine();
-            printer.alignCenter()
-            printer.printBarcode(invoiceId, 74, {height: 50});
-            printer.cut();
-            await printer.execute();
-        } catch (e) {
-            console.error(e);
-        } finally {
-            clearOrder()
-        }
-    };
     const clearOrder = () => {
         dispatch(setPreviewInvoice(false));
         dispatch(clearPreviewOrder());
@@ -84,21 +33,53 @@ export default function InvoicePreview({items, invoiceId, previewInvoice, hidePr
             hidePreview();
         }
         if (resetOrder) {
-            resetOrder()
+            resetOrder();
         }
-    }
+    };
+
+    const printInvoice = async () => {
+        if (invoiceRef.current) {
+            // Capture the invoice content as a canvas
+            html2canvas(invoiceRef.current).then((canvas) => {
+                const imgData = canvas.toDataURL("image/png");
+
+                // Get the canvas width and height
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+
+                // Create a new jsPDF instance
+                const doc = new jsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format:[58,210]
+                });
+
+                // Calculate the dynamic height based on the aspect ratio
+                const imgHeight = (canvasHeight * 58) / canvasWidth;
+
+                // Add the image to the PDF, setting the dynamic height
+                doc.addImage(imgData, "PNG", 0, 0, 58, imgHeight);
+
+                // Open the generated PDF in a new tab
+                const pdfUrl = doc.output("bloburl");
+                window.open(pdfUrl, "_blank");
+            });
+        }
+    };
+
+
     return (
         <Dialog open={previewInvoice} onOpenChange={() => clearOrder()}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>
-                        Preview Invoice
-                    </DialogTitle>
+                    <DialogTitle>Preview Invoice</DialogTitle>
                     <div className="w-full mt-5 flex justify-center items-center flex-col gap-3">
-
-                        <Invoice invoiceId={invoiceId} items={items}/>
+                        {/* Pass the ref to the Invoice component */}
+                        <div ref={invoiceRef}>
+                            <Invoice invoiceId={invoiceId} items={items}/>
+                        </div>
                         <div className="w-full flex justify-center items-center">
-                            <Button onClick={() => printInvoice()}>Print</Button>
+                            <Button onClick={printInvoice}>Print</Button>
                         </div>
                     </div>
                 </DialogHeader>

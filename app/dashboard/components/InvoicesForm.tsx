@@ -18,12 +18,15 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
     const [order, setOrder] = useState<Order | null>(null)
     const {toast} = useToast()
 
-    const getInvoice = async () => {
+    const getInvoice = async (evt) => {
+        evt.preventDefault()
         setLoading(true)
         try {
             const fetchedOrder = await getAOrder(invoiceId);
+            console.log(fetchedOrder)
             setOrder(fetchedOrder)
             setShowInvoicePreview(true)
+            evt.target.reset()
         } catch (e) {
             console.error(e)
             toast({
@@ -44,15 +47,15 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
                             <DialogTitle>
                                 Invoices
                             </DialogTitle>
-                            <div className="w-full pt-3 flex justify-center items-center flex-col gap-3">
-                                <Input type={"text"}
+                            <form onSubmit={(evt)=>getInvoice(evt)} className="w-full pt-3 flex justify-center items-center flex-col gap-3">
+                                <Input required type={"text"}
                                        placeholder={"XD90EP"}
                                        value={invoiceId}
                                        onChange={(event) => setInvoiceId(event.target.value)}/>
-                                <Button onClick={getInvoice}>
+                                <Button type={"submit"}>
                                     Get Invoice
                                 </Button>
-                            </div>
+                            </form>
                         </DialogHeader>
                     </DialogContent>
                 </Dialog>)}

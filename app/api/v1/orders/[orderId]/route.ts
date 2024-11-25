@@ -12,9 +12,9 @@ export const GET = async (req: NextRequest) => {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
         console.log("Authorization successful.");
-        const orderId = new URL(req.url).searchParams.get('orderId');
+        const url = new URL(req.url);
+        const orderId = url.pathname.split('/').pop();
         const order = await getAOrder(orderId || "");
-        console.log("GET request received:", orderId);
         return NextResponse.json(order);
     } catch (error) {
         return NextResponse.json({message: error.message}, {status: 500});
