@@ -1,10 +1,10 @@
 import React from 'react';
-import {CartItem} from "@/interfaces";
+import {Order} from "@/interfaces";
 import Barcode from "@/components/Barcode";
 
-const Invoice = ({items, invoiceId}: { items: CartItem[], invoiceId: string }) => {
+const Invoice = ({order}: { order: Order }) => {
     const getTotal = () => {
-        return items?.map((item) => item.price * item.quantity).reduce((acc, curr) => acc + curr, 0);
+        return order?.items.map((item) => item.price * item.quantity).reduce((acc, curr) => acc + curr, 0);
     };
 
     return (
@@ -20,8 +20,8 @@ const Invoice = ({items, invoiceId}: { items: CartItem[], invoiceId: string }) =
 
             {/* Invoice Info */}
             <div>
-                <p className="text-[10px]">Date: {new Date().toLocaleString()}</p>
-                <p className="text-[10px]">Order #: <span className="uppercase">{invoiceId}</span></p>
+                <p className="text-[10px]">Date: {order?.createdAt}</p>
+                <p className="text-[10px]">Order #: <span className="uppercase">{order?.orderId}</span></p>
             </div>
             <hr className="my-2 border-t border-gray-400"/>
 
@@ -35,16 +35,16 @@ const Invoice = ({items, invoiceId}: { items: CartItem[], invoiceId: string }) =
                 </tr>
                 </thead>
                 <tbody>
-                {items?.map((item, index) => (
+                {order?.items.map((item, index) => (
                     <React.Fragment key={index}>
                         <tr className="text-[12px]">
-                            <td className="text-left uppercase">{item.name}</td>
-                            <td className="text-right">{item.quantity}</td>
-                            <td className="text-right">{item.price}</td>
+                            <td className="text-left uppercase">{item?.name}</td>
+                            <td className="text-right">{item?.quantity}</td>
+                            <td className="text-right">{item?.price}</td>
                         </tr>
                         <tr className="text-[8px]">
                             <td colSpan={3} className="pl-3 uppercase">
-                                {item.itemId}/{item.variantId}/{item.variantName}/{item.size}
+                                {item?.itemId}/{item?.variantId}/{item?.variantName}/{item.size}
                             </td>
                         </tr>
                     </React.Fragment>
@@ -65,7 +65,7 @@ const Invoice = ({items, invoiceId}: { items: CartItem[], invoiceId: string }) =
             <footer className="text-center text-xs mt-4 flex flex-col justify-center items-center">
                 <p>Thank you for shopping!</p>
                 <p>Visit us again.</p>
-                <Barcode value={invoiceId}/>
+                <Barcode value={order?.orderId}/>
             </footer>
 
         </main>

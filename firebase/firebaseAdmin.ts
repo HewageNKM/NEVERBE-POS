@@ -1,5 +1,7 @@
 import admin, {credential} from 'firebase-admin';
 import {CartItem, Item, Order} from "@/interfaces";
+import {Timestamp} from "@firebase/firestore";
+import {createHash} from "node:crypto";
 
 // Initialize Firebase Admin SDK if it hasn't been initialized already
 if (!admin.apps.length) {
@@ -30,13 +32,16 @@ export const getUserById = async (uid: string) => {
         throw error;
     }
 };
-import { getFirestore } from "firebase-admin/firestore";
 
 export const addNewOrder = async (order: Order) => {
-    console.log("Attempting to add new order...");
-    const db = getFirestore();
-
+    console.log("Attempting to add new order Id:" + order.orderId);
+    const db = adminFirestore
     try {
+        const updatedOrder: Order = {
+            ...order,
+            createdAt: Timestamp.now(),
+        }
+        console.log(updatedOrder);
         await db.runTransaction(async (transaction) => {
             const ordersCollection = db.collection("orders");
             const orderRef = ordersCollection.doc(order.orderId);
@@ -46,7 +51,6 @@ export const addNewOrder = async (order: Order) => {
             if (existingOrder.exists) {
                 throw new Error(`Order with ID ${order.orderId} already exists.`);
             }
-
             // Add the new order to the collection
             transaction.set(orderRef, order);
         });
@@ -81,7 +85,10 @@ export const getAOrder = async (orderId: string) => {
             new Error('Order not found');
         }
         console.log(`Order with ID ${orderId} retrieved successfully.`);
-        return order.data() as Order;
+        return {
+            ...order.data(),
+            createdAt: new Date((order.data()?.createdAt as Timestamp).seconds * 1000).toLocaleString(),
+        };
     } catch (error) {
         console.error(`Error retrieving order with ID ${orderId}:`, error);
         throw error;
@@ -107,11 +114,11 @@ export const getInventory = async (page: number = 1, size: number = 20) => {
         throw error;
     }
 }
-export const getAItem = async (itemId:string) => {
+export const getAItem = async (itemId: string) => {
     console.log(`Attempting to retrieve item with ID: ${itemId}`);
     try {
         const item = await adminFirestore.collection('inventory').doc(itemId).get();
-        const items:Item[] = []
+        const items: Item[] = []
         if (!item.exists) {
             console.warn(`Item with ID ${itemId} not found.`);
             new Error('Item not found');
@@ -299,3 +306,31 @@ export const verifyIdToken = async (token: string) => {
         throw error;
     }
 };
+
+const hashPassword = (password: string): string => {
+    const hash = createHash("sha256"); // Use a secure algorithm like SHA-256
+    hash.update(password); // Add the password to the hash
+    return hash.digest("hex"); // Return the hashed password as a hexadecimal string
+};
+export const authenticateUserPassword = async (user) => {
+    console.log("Hash: "+hashPassword(user.password));
+    try {
+        const userRef = adminFirestore.collection('users').doc(user.uid);
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) {
+            console.warn(`User with uid ${user.uid} not found.`);
+            throw new Error('User not found');
+        }
+        const userData = userDoc.data();
+        const password = hashPassword(user.password);
+        if (userData.password !== password) {
+            console.warn('Incorrect password');
+            throw new Error('Incorrect password');
+        }
+        console.log('User authenticated successfully');
+        return userData;
+    } catch (error) {
+        console.error('Error authenticating user:', error);
+        throw error;
+    }
+}

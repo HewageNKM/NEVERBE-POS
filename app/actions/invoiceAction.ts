@@ -85,3 +85,31 @@ export const getAOrder = async (orderId: string) => {
         throw e;
     }
 }
+
+export const sendPrintInvoice = async (order: Order) => {
+    console.log(order);
+    try {
+        const res = await axios({
+            method: 'POST',
+            url: `http://localhost:4444/print`,
+            headers:{
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(order),
+        });
+        return res.data;
+    } catch (e) {
+        throw e;
+    }
+}
+export const openDrawer = async()  => {
+    try {
+        const res = await axios({
+            method: 'GET',
+            url: `http://localhost:4444/drawer`,
+        });
+        return res.data;
+    } catch (e) {
+        throw e;
+    }
+}

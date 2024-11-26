@@ -16,9 +16,7 @@ const InvoiceDetails = () => {
         items,
         isInvoiceLoading,
         showPaymentDialog,
-        previewInvoice,
         invoiceId,
-        previewOrder
     } = useAppSelector((state) => state.invoice);
     const dispatch = useAppDispatch();
     const {user} = useAppSelector((state) => state.auth);
@@ -89,8 +87,8 @@ const InvoiceDetails = () => {
                     Place Order
                 </Button>
             </div>
-            {showPaymentDialog && (<PaymentForm/>)}
-            <InvoicePreview invoiceId={previewOrder?.orderId} previewInvoice={previewInvoice} items={previewOrder?.items}/>
+            {showPaymentDialog && (<PaymentForm />)}
+            <InvoicePreview />
         </div>
     );
 };

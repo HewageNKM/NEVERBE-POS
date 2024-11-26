@@ -45,3 +45,27 @@ export const isUserExists = async (uid: string) => {
         throw e;
     }
 }
+
+export const authenticatePassword = async (password: string) => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+        const uid = auth.currentUser?.uid;
+
+        const ob = {
+            password: password,
+            uid: uid
+        }
+        const response = await axios({
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            url: `/api/v1/users`,
+            data: JSON.stringify(ob)
+        });
+        return response.status === 200 ? response.data : null;
+    } catch (e) {
+        throw e;
+    }
+}

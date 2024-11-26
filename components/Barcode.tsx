@@ -9,10 +9,10 @@ const Barcode = ({ value }:{value:string}) => {
     useEffect(() => {
         if (svgRef.current) {
             JsBarcode(svgRef.current, value, {
-                format: 'CODE128', // Choose barcode format
+                format: 'CODE39', // Choose barcode format
                 lineColor: '#000',
-                width: 2,
-                height: 40,
+                width: 1,
+                height: 35,
                 displayValue: false,
             });
         }

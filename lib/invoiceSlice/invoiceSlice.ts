@@ -1,13 +1,13 @@
 import {CartItem, Order} from "@/interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {getPosCart} from "@/app/actions/invoiceAction";
-import {uuidv4} from "@firebase/util";
 
 interface InvoiceSlice {
     items: CartItem[],
     invoiceId: string | null,
     showPaymentDialog: boolean,
     isInvoiceLoading: boolean,
+
     previewInvoice: boolean
     previewOrder: Order | null
 }
@@ -20,6 +20,16 @@ const initialState: InvoiceSlice = {
     showPaymentDialog: false,
     items: []
 }
+
+const generateInvoiceId = () => {
+    // Generate a unique alphanumeric order ID with a shorter length
+    const timestamp = Date.now().toString(36).slice(-3);  // Take only the last 6 characters of the base-36 timestamp
+    const randomPart = Math.random().toString(36).substring(2, 6); // Shorter random part (2 characters)
+
+    return `${timestamp}-${randomPart}`.toUpperCase();
+};
+
+
 
 export const invoiceSlice = createSlice({
     name: 'invoice',
@@ -41,18 +51,13 @@ export const invoiceSlice = createSlice({
         initializeInvoicedId: (state) => {
             let invoiceId = window.localStorage.getItem("posInvoiceId");
             if (invoiceId == null) {
-                invoiceId = uuidv4().replace(/-/g, '').substring(0, 5);
+                invoiceId = generateInvoiceId()
                 window.localStorage.setItem("posInvoiceId", invoiceId);
             }
             state.invoiceId = invoiceId;
         },
-        setPreviewOrder: (state, action: PayloadAction<Order>) => {
+        setPreviewOrder: (state, action: PayloadAction<Order|null>) => {
             state.previewOrder = action.payload
-            state.previewInvoice = true
-        },
-        clearPreviewOrder: (state) => {
-            state.previewOrder = null
-            state.previewInvoice = false
         },
     },
     extraReducers: (builder) => {

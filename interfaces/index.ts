@@ -66,6 +66,7 @@ export interface Order {
     paymentMethod: string,
     shippingCost: number,
     from: string,
+    createdAt?: string | Timestamp;
 }
 
 export interface User {

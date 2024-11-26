@@ -4,7 +4,7 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {
     getPosCartItems,
-    initializeInvoicedId,
+    initializeInvoicedId, setPreviewInvoice,
     setPreviewOrder,
     setShowPaymentDialog
 } from "@/lib/invoiceSlice/invoiceSlice";
@@ -14,10 +14,11 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/
 import {Input} from "@/components/ui/input";
 import {PaymentMethods} from "@/constant";
 import {Order, OrderItem, Payment} from "@/interfaces";
-import {addOrder} from "@/app/actions/invoiceAction";
+import {addOrder, getAOrder} from "@/app/actions/invoiceAction";
 import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
 import {getProducts} from "@/lib/prodcutSlice/productSlice";
+import {Timestamp} from "@firebase/firestore";
 
 
 const PaymentForm = () => {
@@ -84,19 +85,23 @@ const PaymentForm = () => {
                 price: item.price,
             }));
 
-            const newOrder: Order = {
+            let newOrder: Order = {
                 items: orderItems,
                 orderId: (invoiceId || "").toLowerCase(),
                 paymentId: "None",
                 paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
                 paymentStatus: "Paid",
                 shippingCost: 0,
+                createdAt: Timestamp.now(),
                 from: "Store",
             }
             await addOrder(newOrder);
-
             dispatch(setShowPaymentDialog(false));
+            newOrder = await getAOrder(newOrder.orderId);
+
             dispatch(setPreviewOrder(newOrder))
+            dispatch(setPreviewInvoice(true))
+
             window.localStorage.removeItem("posInvoiceId");
             dispatch(initializeInvoicedId());
             dispatch(getPosCartItems());
@@ -168,7 +173,8 @@ const PaymentForm = () => {
                             value={selectedPaymentMethod}
                             onValueChange={(value) => setSelectedPaymentMethod(value)}
                         >
-                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}
+                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60"
+                                           onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}
                             >
                                 <SelectValue placeholder="Select Payment Method"/>
                             </SelectTrigger>
@@ -182,13 +188,15 @@ const PaymentForm = () => {
                             </SelectContent>
                         </Select>
                         <Input
-                            className="disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}
+                            className="disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment}
+                            disabled={getTotal() - getItemsTotal() >= 0}
                             type="number"
                             placeholder="Enter payment amount"
                             value={paymentAmount}
                             onChange={(e) => setPaymentAmount(e.target.value)}
                         />
-                        <Button className="self-end disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}>
+                        <Button className="self-end disabled:cursor-not-allowed disabled:bg-opacity-60"
+                                onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}>
                             Add Payment
                         </Button>
                     </div>

@@ -3,10 +3,11 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import InvoicePreview from "@/app/dashboard/components/PreviewInvoice";
-import {Order} from "@/interfaces";
 import {getAOrder} from "@/app/actions/invoiceAction";
 import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
+import {useAppDispatch} from "@/lib/hooks";
+import {setPreviewInvoice, setPreviewOrder} from "@/lib/invoiceSlice/invoiceSlice";
 
 const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
     setShowInvoicesForm: React.Dispatch<React.SetStateAction<boolean>>,
@@ -14,18 +15,18 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
 }) => {
     const [loading, setLoading] = useState(false)
     const [invoiceId, setInvoiceId] = useState("")
-    const [showInvoicePreview, setShowInvoicePreview] = useState(false)
-    const [order, setOrder] = useState<Order | null>(null)
+    const dispatch = useAppDispatch();
     const {toast} = useToast()
+
 
     const getInvoice = async (evt) => {
         evt.preventDefault()
         setLoading(true)
         try {
             const fetchedOrder = await getAOrder(invoiceId.toLowerCase());
-            console.log(fetchedOrder)
-            setOrder(fetchedOrder)
-            setShowInvoicePreview(true)
+            dispatch(setPreviewOrder(fetchedOrder))
+            dispatch(setPreviewInvoice(true))
+            setShowInvoicesForm(false)
             evt.target.reset()
         } catch (e) {
             console.error(e)
@@ -47,7 +48,8 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
                             <DialogTitle>
                                 Invoices
                             </DialogTitle>
-                            <form onSubmit={(evt)=>getInvoice(evt)} className="w-full pt-3 flex justify-center items-center flex-col gap-3">
+                            <form onSubmit={(evt) => getInvoice(evt)}
+                                  className="w-full pt-3 flex justify-center items-center flex-col gap-3">
                                 <Input required type={"text"}
                                        placeholder={"XD90EP"}
                                        value={invoiceId}
@@ -59,11 +61,7 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
                         </DialogHeader>
                     </DialogContent>
                 </Dialog>)}
-            <InvoicePreview items={order?.items}
-                            previewInvoice={showInvoicePreview}
-                            invoiceId={order?.orderId}
-                            resetOrder={() => setOrder(null)}
-                            hidePreview={() => setShowInvoicePreview(false)}/>
+            <InvoicePreview/>
         </>
     );
 };

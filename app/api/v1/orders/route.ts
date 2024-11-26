@@ -16,6 +16,7 @@ export const POST = async (req: NextRequest) => {
         await addNewOrder(json);
         return NextResponse.json("POST request received");
     } catch (error) {
+        console.error("An error occurred while processing the POST request:", error);
         return NextResponse.json({message: error.message}, {status: 500});
     }
 
