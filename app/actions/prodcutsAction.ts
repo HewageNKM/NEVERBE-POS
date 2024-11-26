@@ -18,3 +18,21 @@ export const getInventory = async (page: number, size: number) => {
         throw e;
     }
 }
+
+export const getAItem = async (itemId: string) => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+
+        const response = await axios({
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            url: `/api/v1/inventory/${itemId}`,
+        });
+        return response.data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}

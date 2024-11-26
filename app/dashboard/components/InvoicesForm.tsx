@@ -22,7 +22,7 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
         evt.preventDefault()
         setLoading(true)
         try {
-            const fetchedOrder = await getAOrder(invoiceId);
+            const fetchedOrder = await getAOrder(invoiceId.toLowerCase());
             console.log(fetchedOrder)
             setOrder(fetchedOrder)
             setShowInvoicePreview(true)

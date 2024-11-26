@@ -86,7 +86,7 @@ const PaymentForm = () => {
 
             const newOrder: Order = {
                 items: orderItems,
-                orderId: invoiceId || "",
+                orderId: (invoiceId || "").toLowerCase(),
                 paymentId: "None",
                 paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
                 paymentStatus: "Paid",

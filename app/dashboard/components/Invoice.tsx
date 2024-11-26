@@ -11,17 +11,17 @@ const Invoice = ({items, invoiceId}: { items: CartItem[], invoiceId: string }) =
         <main className="invoice text-xs w-[58mm] p-4 bg-white text-black font-mono">
             {/* Header */}
             <header className="text-center">
-                <h1 className="text-lg font-bold">NEVERBE</h1>
-                <p className="text-xs">New Kandy Road, Delgoda</p>
-                <p className="text-xs">+9472624999 +9470528999</p>
-                <p className="text-xs">support@neverbe.lk</p>
+                <h1 className="text-xs font-bold">NEVERBE</h1>
+                <p className="text-[10px]">New Kandy Road, Delgoda</p>
+                <p className="text-[10px]">+9472624999 +9470528999</p>
+                <p className="text-[10px]">support@neverbe.lk</p>
             </header>
             <hr className="my-2 border-t border-gray-400"/>
 
             {/* Invoice Info */}
             <div>
-                <p className="text-xs">Date: {new Date().toLocaleString()}</p>
-                <p className="text-xs">Order #: <span className="uppercase">{invoiceId}</span></p>
+                <p className="text-[10px]">Date: {new Date().toLocaleString()}</p>
+                <p className="text-[10px]">Order #: <span className="uppercase">{invoiceId}</span></p>
             </div>
             <hr className="my-2 border-t border-gray-400"/>
 
@@ -37,7 +37,7 @@ const Invoice = ({items, invoiceId}: { items: CartItem[], invoiceId: string }) =
                 <tbody>
                 {items?.map((item, index) => (
                     <React.Fragment key={index}>
-                        <tr className="text-xs">
+                        <tr className="text-[12px]">
                             <td className="text-left uppercase">{item.name}</td>
                             <td className="text-right">{item.quantity}</td>
                             <td className="text-right">{item.price}</td>

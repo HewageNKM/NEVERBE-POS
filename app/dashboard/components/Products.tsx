@@ -42,6 +42,7 @@ const Products = () => {
             dispatch(setCurrentPage(page));
         }
     };
+    console.log(products);
     return (
         <div
             className="rounded-lg p-4 mt-10 bg-background shadow relative lg:min-h-[80vh] md:min-h-[60vh] min-h-screen">
@@ -50,7 +51,7 @@ const Products = () => {
                 {/* Display products */}
                 <div className="mb-10">
                     <ul className="grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-5 md:gap-10">
-                        {products.map((product: Item) => (
+                        {products.map((product: Item,i) => (
                             <li key={product.itemId} className="mb-4">
                                 <ItemCard item={product} onAdd={() => {
                                     dispatch(setSelectedItem(product));

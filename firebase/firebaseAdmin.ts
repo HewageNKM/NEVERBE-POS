@@ -107,7 +107,24 @@ export const getInventory = async (page: number = 1, size: number = 20) => {
         throw error;
     }
 }
-
+export const getAItem = async (itemId:string) => {
+    console.log(`Attempting to retrieve item with ID: ${itemId}`);
+    try {
+        const item = await adminFirestore.collection('inventory').doc(itemId).get();
+        const items:Item[] = []
+        if (!item.exists) {
+            console.warn(`Item with ID ${itemId} not found.`);
+            new Error('Item not found');
+            return items;
+        }
+        console.log(`Item with ID ${itemId} retrieved successfully.`);
+        items.push(item.data() as Item);
+        return items;
+    } catch (error) {
+        console.error(`Error retrieving item with ID ${itemId}:`, error);
+        throw error;
+    }
+}
 export const getPosCart = async () => {
     try {
         const posCartCollection = adminFirestore.collection("posCart");

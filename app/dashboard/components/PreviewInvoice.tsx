@@ -7,7 +7,6 @@ import {clearPreviewOrder, setPreviewInvoice} from "@/lib/invoiceSlice/invoiceSl
 import {jsPDF} from "jspdf";
 import html2canvas from "html2canvas";
 import Invoice from "@/app/dashboard/components/Invoice";
-import {fit} from "sharp";
 
 export default function InvoicePreview({
                                            items,
@@ -41,24 +40,13 @@ export default function InvoicePreview({
         if (invoiceRef.current) {
             // Capture the invoice content as a canvas
             html2canvas(invoiceRef.current).then((canvas) => {
-                const imgData = canvas.toDataURL("image/png");
-
-                // Get the canvas width and height
-                const canvasWidth = canvas.width;
-                const canvasHeight = canvas.height;
 
                 // Create a new jsPDF instance
                 const doc = new jsPDF({
                     orientation: "portrait",
                     unit: "mm",
-                    format:[58,210]
+                    format:[58, 100],
                 });
-
-                // Calculate the dynamic height based on the aspect ratio
-                const imgHeight = (canvasHeight * 58) / canvasWidth;
-
-                // Add the image to the PDF, setting the dynamic height
-                doc.addImage(imgData, "PNG", 0, 0, 58, imgHeight);
 
                 // Open the generated PDF in a new tab
                 const pdfUrl = doc.output("bloburl");
