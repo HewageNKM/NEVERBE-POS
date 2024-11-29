@@ -73,5 +73,6 @@ export interface User {
     email: string,
     username: string,
     role: string,
+    status: string,
     imageUrl: string,
 }

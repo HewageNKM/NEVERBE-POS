@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Dialog, DialogContent} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {useAppSelector} from "@/lib/hooks";
 import {Button} from "@/components/ui/button";
@@ -41,10 +41,10 @@ const UserAuthenticateDialog = ({setShowUserAuthDialog, showUserAuthDialog}: {
     return (
         <Dialog open={showUserAuthDialog} onOpenChange={() => closeDialog()}>
             <DialogContent>
-                <div className="w-full pt-3 flex justify-center items-center flex-col gap-3">
-                    <h1 className="text-2xl font-bold">Authenticate</h1>
+                <DialogTitle className="w-full pt-3 flex justify-center items-center flex-col gap-3">
+                    Authenticate
                     <p className="text-sm">Please Authenticate to continue</p>
-                </div>
+                </DialogTitle>
                 <form onSubmit={(evt) => onAuthFormSubmit(evt)}
                       className="w-full pt-3 flex justify-center items-center flex-col gap-3">
                     <Input disabled className="disabled:bg-opacity-60 disabled:cursor-not-allowed"

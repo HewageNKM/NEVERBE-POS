@@ -15,17 +15,13 @@ export const authenticateUser = async (email: string, password: string) => {
                 },
                 url: `/api/v1/users/${credential.user.uid}`,
             });
-            if (response.status === 200) {
-                return {
-                    user: response.data
-                }
-            } else {
-                new Error('Failed to fetch user data')
-            }
+            return response.data;
         } else {
+            await auth.signOut();
             new Error('Failed to authenticate user')
         }
     } catch (e) {
+        await auth.signOut();
         throw e;
     }
 }

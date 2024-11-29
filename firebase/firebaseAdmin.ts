@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {CartItem, Item, Order} from "@/interfaces";
+import {CartItem, Item, Order, User} from "@/interfaces";
 import {Timestamp} from "@firebase/firestore";
 import {createHash} from "node:crypto";
 
@@ -23,8 +23,15 @@ export const getUserById = async (uid: string) => {
         const user = await adminFirestore.collection('users').doc(uid).get();
         if (!user.exists) {
             console.warn(`User with ID ${uid} not found.`);
-            new Error('User not found');
+            throw new Error('User not found');
         }
+
+        const userData: User = user.data();
+        if (userData.status !== 'Active') {
+            console.warn(`User with ID ${uid} is not active.`);
+            throw new Error('User is not active');
+        }
+
         console.log(`User with ID ${uid} retrieved successfully.`);
         return user.data();
     } catch (error) {
@@ -82,7 +89,11 @@ export const getAOrder = async (orderId: string) => {
         const order = await adminFirestore.collection('orders').doc(orderId).get();
         if (!order.exists) {
             console.warn(`Order with ID ${orderId} not found.`);
-            new Error('Order not found');
+            throw new Error('Order not found');
+        }
+        if(order.data()?.from !== 'Store'){
+            console.warn(`Order with ID ${orderId} is not from Store.`);
+            throw new Error('Order is not from Store');
         }
         console.log(`Order with ID ${orderId} retrieved successfully.`);
         return {
@@ -121,8 +132,7 @@ export const getAItem = async (itemId: string) => {
         const items: Item[] = []
         if (!item.exists) {
             console.warn(`Item with ID ${itemId} not found.`);
-            new Error('Item not found');
-            return items;
+            throw new Error('Item not found');
         }
         console.log(`Item with ID ${itemId} retrieved successfully.`);
         items.push(item.data() as Item);
@@ -313,7 +323,7 @@ const hashPassword = (password: string): string => {
     return hash.digest("hex"); // Return the hashed password as a hexadecimal string
 };
 export const authenticateUserPassword = async (user) => {
-    console.log("Hash: "+hashPassword(user.password));
+    console.log("Hash: " + hashPassword(user.password));
     try {
         const userRef = adminFirestore.collection('users').doc(user.uid);
         const userDoc = await userRef.get();
