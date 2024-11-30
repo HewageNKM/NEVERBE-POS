@@ -13,7 +13,7 @@ const CartItemCard = ({
                       }: {
     item: CartItem;
 }) => {
-    const {thumbnail, name, variantName, itemId, variantId, quantity, price, size} = item;
+    const {thumbnail, name, variantName, itemId, variantId, quantity, price, size, discount} = item;
     const dispatch = useAppDispatch();
     const {currentPage,currentSize} = useAppSelector(state => state.product);
 
@@ -40,7 +40,7 @@ const CartItemCard = ({
                     className="w-12 h-12 object-cover rounded"
                 />
                 <div>
-                    <p className="text-lg font-medium">{name}</p>
+                    <p className="text-lg font-medium">{name}({discount}%OFF)</p>
                     <p className="text-sm text-gray-500 capitalize">{variantName}/{size}</p>
                     <p className="text-sm text-gray-400 uppercase">
                         {itemId}/ {variantId}
@@ -49,8 +49,8 @@ const CartItemCard = ({
             </div>
             <div className="flex flex-col items-end">
                 <span className="text-lg font-medium">Qty: {quantity}</span>
-                <span className="text-lg font-medium">LKR {price.toFixed(2)}</span>
-                <span className="text-sm text-gray-500">Total: LKR {(quantity * price).toFixed(2)}</span>
+                <span className="text-lg font-medium">LKR {(price - (discount * price / 100)).toFixed(2)}</span>
+                <span className="text-sm text-gray-500">Total: LKR {(quantity * (price - (discount * price / 100))).toFixed(2)}</span>
                 <Button
                     variant={"outline"}
                     onClick={() => removeItemFromCart()}

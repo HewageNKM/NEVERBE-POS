@@ -26,6 +26,7 @@ const VariantForm = () => {
 
     const addToCart = async () => {
         const newCartItem: CartItem = {
+            discount: selectedItem?.discount || 0,
             itemId: selectedItem?.itemId || "",
             name: selectedItem?.name || "",
             price: selectedItem?.sellingPrice || 0,

@@ -30,7 +30,7 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
             <CardContent className="flex flex-col justify-between flex-grow p-4">
                 <h3 className="text-lg font-semibold truncate">{item.name}</h3>
                 <p className="text-sm capitalize">{item.brand}</p>
-                <p className="text-sm mt-2">LKR {item.sellingPrice}</p>
+                <p className="text-sm mt-2">LKR {item.sellingPrice} <span className="p-1 rounded bg-yellow-800">-({item.discount}OFF)</span></p>
             </CardContent>
 
             {/* Action Section (e.g., Add to Cart Button) */}

@@ -36,7 +36,7 @@ const PaymentForm = () => {
     };
 
     const getItemsTotal = () => {
-        return items.map((item) => item.price * item.quantity).reduce((acc, curr) => acc + curr, 0);
+        return items.map((item) =>  item.quantity * (item.price - (item.price * item.discount / 100))).reduce((acc, curr) => acc + curr, 0);
     };
 
     const addPayment = () => {

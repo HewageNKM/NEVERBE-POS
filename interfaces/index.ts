@@ -43,6 +43,7 @@ export interface CartItem {
     variantName: string,
     thumbnail: string,
     size: string,
+    discount: number,
     type: string,
     quantity: number,
     price: number,
