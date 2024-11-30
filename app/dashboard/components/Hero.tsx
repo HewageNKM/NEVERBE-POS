@@ -10,6 +10,7 @@ import {setIsLoading, setProducts} from "@/lib/prodcutSlice/productSlice";
 import {BsCash} from "react-icons/bs";
 import UserAuthenticateDialog from "@/app/dashboard/components/UserAuthenticateDialog";
 import {algoliasearch} from "algoliasearch";
+import {Item} from "@/interfaces";
 
 const Hero = () => {
     const [showInvoicesForm, setShowInvoicesForm] = useState(false);
@@ -23,7 +24,8 @@ const Hero = () => {
         dispatch(setIsLoading(true));
         try {
             const results = await client.search({requests: [{indexName: "inventory_index", query}]});
-            dispatch(setProducts(results.results[0].hits));
+            const filterInactives = results.results[0].hits.filter((item:Item) => item.status === "Active");
+            dispatch(setProducts(filterInactives));
             evt.target.reset();
         } catch (e) {
             console.error(e);

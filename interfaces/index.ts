@@ -10,6 +10,7 @@ export interface Item {
     },
     variants: Variant[],
     manufacturer: string,
+    status: "Active" | "Inactive",
     name: string,
     sellingPrice: number,
     discount: number,

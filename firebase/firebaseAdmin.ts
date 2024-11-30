@@ -91,7 +91,7 @@ export const getAOrder = async (orderId: string) => {
             console.warn(`Order with ID ${orderId} not found.`);
             throw new Error('Order not found');
         }
-        if(order.data()?.from !== 'Store'){
+        if (order.data()?.from !== 'Store') {
             console.warn(`Order with ID ${orderId} is not from Store.`);
             throw new Error('Order is not from Store');
         }
@@ -110,7 +110,7 @@ export const getInventory = async (page: number = 1, size: number = 20) => {
     try {
         const offset = (page - 1) * size;
         const inventory = adminFirestore.collection('inventory');
-        const snapshot = await inventory.limit(size).offset(offset).get();
+        const snapshot = await inventory.limit(size).offset(offset).where("status", "==", "Active").get();
         const inventoryData = snapshot.docs.map(doc => doc.data());
         const items: Item[] = []
         inventoryData.forEach(item => {
@@ -135,6 +135,11 @@ export const getAItem = async (itemId: string) => {
             throw new Error('Item not found');
         }
         console.log(`Item with ID ${itemId} retrieved successfully.`);
+        if(item.data().status !== 'Active'){
+            console.warn(`Item with ID ${itemId} is not active.`);
+            throw new Error('Item is not active');
+        }
+
         items.push(item.data() as Item);
         return items;
     } catch (error) {
