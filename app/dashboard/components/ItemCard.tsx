@@ -15,13 +15,13 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
                     height={200}
                     className="object-cover rounded-t-lg w-full h-full"
                 />
-                <p className="text-sm bg-green-400 absolute top-2 right-2 px-2 py-1 rounded font-medium capitalize">
+                <p className="text-sm bg-green-400 text-white absolute top-7 right-2 px-2 py-1 rounded font-medium capitalize">
                     {item.manufacturer}
                 </p>
-                <p className="text-sm bg-yellow-500 absolute bottom-2 right-2 px-2 py-1 rounded font-medium capitalize">
+                <p className="text-sm bg-yellow-500 text-white absolute bottom-2 right-2 px-2 py-1 rounded font-medium capitalize">
                     {item.variants.length} Variants
                 </p>
-                <p className="text-sm bg-red-500 absolute top-1 uppercase left-2 px-2 py-1 rounded font-medium">
+                <p className="text-sm bg-red-500 text-white absolute top-1 uppercase left-2 px-2 py-1 rounded font-medium">
                     {item.itemId}
                 </p>
             </CardHeader>
@@ -30,7 +30,7 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
             <CardContent className="flex flex-col justify-between flex-grow p-4">
                 <h3 className="text-lg font-semibold truncate">{item.name}</h3>
                 <p className="text-sm capitalize">{item.brand}</p>
-                <p className="text-sm mt-2">LKR {item.sellingPrice} <span className="p-1 rounded bg-yellow-800">-({item.discount}OFF)</span></p>
+                <p className="text-sm mt-2">LKR {item.sellingPrice} <span className="p-1 rounded text-white bg-yellow-800">-({item.discount}OFF)</span></p>
             </CardContent>
 
             {/* Action Section (e.g., Add to Cart Button) */}
