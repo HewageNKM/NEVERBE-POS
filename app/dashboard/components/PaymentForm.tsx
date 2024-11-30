@@ -83,6 +83,7 @@ const PaymentForm = () => {
                 size: item.size,
                 quantity: item.quantity,
                 price: item.price,
+                discount: item.discount,
             }));
 
             let newOrder: Order = {

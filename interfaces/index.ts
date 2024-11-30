@@ -57,6 +57,7 @@ export interface OrderItem {
     size: string,
     quantity: number,
     price: number,
+    discount: number,
 }
 
 export interface Order {
