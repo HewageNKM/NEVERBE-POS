@@ -22,7 +22,7 @@ const InvoiceDetails = () => {
     const {user} = useAppSelector((state) => state.auth);
 
     // Calculate totals
-    const subtotal = items?.reduce((acc, item) => acc + ( item.quantity * (item.price - (item.discount * item.price / 100))), 0);
+    const subtotal = items?.reduce((acc, item) => acc + ( item.quantity * item.price), 0);
     const total = subtotal;
 
     useEffect(() => {
