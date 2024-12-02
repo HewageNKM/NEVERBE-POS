@@ -42,13 +42,16 @@ export const getUserById = async (uid: string) => {
 
 export const addNewOrder = async (order: Order) => {
     console.log("Attempting to add new order Id:" + order.orderId);
-    const db = adminFirestore
+    const db = adminFirestore;
+
     try {
         const updatedOrder: Order = {
             ...order,
-            createdAt: Timestamp.now(),
-        }
+            createdAt: admin.firestore.Timestamp.now(),
+            updatedAt: admin.firestore.Timestamp.now(),
+        };
         console.log(updatedOrder);
+
         await db.runTransaction(async (transaction) => {
             const ordersCollection = db.collection("orders");
             const orderRef = ordersCollection.doc(order.orderId);
@@ -58,8 +61,9 @@ export const addNewOrder = async (order: Order) => {
             if (existingOrder.exists) {
                 throw new Error(`Order with ID ${order.orderId} already exists.`);
             }
+
             // Add the new order to the collection
-            transaction.set(orderRef, order);
+            transaction.set(orderRef, updatedOrder); // Use updatedOrder here
         });
 
         console.log("New order added successfully.");
@@ -98,7 +102,8 @@ export const getAOrder = async (orderId: string) => {
         console.log(`Order with ID ${orderId} retrieved successfully.`);
         return {
             ...order.data(),
-            createdAt: new Date((order.data()?.createdAt as Timestamp).seconds * 1000).toLocaleString(),
+            createdAt: order.data()?.createdAt.toLocaleString(),
+            updatedAt: order.data()?.updatedAt.toLocaleString(),
         };
     } catch (error) {
         console.error(`Error retrieving order with ID ${orderId}:`, error);
