@@ -2,19 +2,14 @@
 import React, {useState} from "react";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {
-    getPosCartItems,
-    initializeInvoicedId, setPreviewInvoice,
-    setPreviewOrder,
-    setShowPaymentDialog
-} from "@/lib/invoiceSlice/invoiceSlice";
+import {getPosCartItems, initializeInvoicedId, setShowPaymentDialog} from "@/lib/invoiceSlice/invoiceSlice";
 import {Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {Input} from "@/components/ui/input";
 import {PaymentMethods} from "@/constant";
 import {Order, OrderItem, Payment} from "@/interfaces";
-import {addOrder, getAOrder} from "@/app/actions/invoiceAction";
+import {addOrder, getAOrder, sendPrintInvoice} from "@/app/actions/invoiceAction";
 import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
 import {getProducts} from "@/lib/prodcutSlice/productSlice";
@@ -36,7 +31,7 @@ const PaymentForm = () => {
     };
 
     const getItemsTotal = () => {
-        return items.map((item) =>  item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
+        return items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
     };
 
     const addPayment = () => {
@@ -99,9 +94,7 @@ const PaymentForm = () => {
             await addOrder(newOrder);
             dispatch(setShowPaymentDialog(false));
             newOrder = await getAOrder(newOrder.orderId);
-
-            dispatch(setPreviewOrder(newOrder))
-            dispatch(setPreviewInvoice(true))
+            await sendPrintInvoice(newOrder);
 
             window.localStorage.removeItem("posInvoiceId");
             dispatch(initializeInvoicedId());
