@@ -6,7 +6,6 @@ const Invoice = ({order}: { order: Order }) => {
     const getTotal = () => {
         return order?.items.map((item) => item.price * item.quantity).reduce((acc, curr) => acc + curr, 0);
     };
-
     return (
         <main className="invoice text-xs w-[58mm] p-4 bg-white text-black font-mono">
             {/* Header */}

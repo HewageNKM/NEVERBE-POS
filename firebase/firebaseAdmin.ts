@@ -1,6 +1,5 @@
 import admin, {credential} from 'firebase-admin';
 import {CartItem, Item, Order, User} from "@/interfaces";
-import {Timestamp} from "@firebase/firestore";
 import {createHash} from "node:crypto";
 
 // Initialize Firebase Admin SDK if it hasn't been initialized already
@@ -41,8 +40,12 @@ export const getUserById = async (uid: string) => {
 };
 
 export const addNewOrder = async (order: Order) => {
-    console.log("Attempting to add new order Id:" + order.orderId);
+    console.log("Attempting to add new order Id:", order.orderId);
+
     const db = adminFirestore;
+    if (!order || typeof order !== "object") {
+        throw new Error("Invalid payload: Payload must be an object.");
+    }
 
     try {
         const updatedOrder: Order = {
@@ -50,30 +53,34 @@ export const addNewOrder = async (order: Order) => {
             createdAt: admin.firestore.Timestamp.now(),
             updatedAt: admin.firestore.Timestamp.now(),
         };
-        console.log(updatedOrder);
+
+        console.log("Updated Order Object:", updatedOrder);
 
         await db.runTransaction(async (transaction) => {
             const ordersCollection = db.collection("orders");
             const orderRef = ordersCollection.doc(order.orderId);
 
-            // Check if the order already exists
+            console.log("Checking if order exists:", orderRef.path);
             const existingOrder = await transaction.get(orderRef);
+
             if (existingOrder.exists) {
                 throw new Error(`Order with ID ${order.orderId} already exists.`);
             }
 
-            // Add the new order to the collection
-            transaction.set(orderRef, updatedOrder); // Use updatedOrder here
+            transaction.set(orderRef, updatedOrder);
         });
 
         console.log("New order added successfully.");
 
-        // Delete all documents in the posCart collection
         const posCartSnapshot = await db.collection("posCart").get();
         if (!posCartSnapshot.empty) {
             const batch = db.batch();
             posCartSnapshot.docs.forEach((doc) => {
-                batch.delete(doc.ref);
+                if (!doc.ref) {
+                    console.error("Invalid document reference in posCart:", doc);
+                } else {
+                    batch.delete(doc.ref);
+                }
             });
 
             await batch.commit();
@@ -100,11 +107,14 @@ export const getAOrder = async (orderId: string) => {
             throw new Error('Order is not from Store');
         }
         console.log(`Order with ID ${orderId} retrieved successfully.`);
-        return {
-            ...order.data(),
-            createdAt: order.data()?.createdAt.toLocaleString(),
-            updatedAt: order.data()?.updatedAt.toLocaleString(),
-        };
+
+        const orderData = order.data() as Order;
+        const updatedOrder:Order = {
+            ...orderData,
+            updatedAt: orderData?.createdAt?.toDate().toLocaleString(),
+            createdAt: orderData?.createdAt?.toDate().toLocaleString(),
+        }
+        return updatedOrder;
     } catch (error) {
         console.error(`Error retrieving order with ID ${orderId}:`, error);
         throw error;
@@ -140,7 +150,7 @@ export const getAItem = async (itemId: string) => {
             throw new Error('Item not found');
         }
         console.log(`Item with ID ${itemId} retrieved successfully.`);
-        if(item.data().status !== 'Active'){
+        if (item.data().status !== 'Active') {
             console.warn(`Item with ID ${itemId} is not active.`);
             throw new Error('Item is not active');
         }

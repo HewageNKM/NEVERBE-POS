@@ -89,6 +89,7 @@ const PaymentForm = () => {
                 paymentStatus: "Paid",
                 shippingCost: 0,
                 createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now(),
                 from: "Store",
             }
             await addOrder(newOrder);
@@ -96,7 +97,6 @@ const PaymentForm = () => {
             newOrder = await getAOrder(newOrder.orderId);
             await sendPrintInvoice(newOrder);
 
-            window.localStorage.removeItem("posInvoiceId");
             dispatch(initializeInvoicedId());
             dispatch(getPosCartItems());
             dispatch(getProducts({size: currentSize, page: currentPage}))
@@ -108,6 +108,7 @@ const PaymentForm = () => {
                 variant: "destructive"
             })
         } finally {
+            window.localStorage.removeItem("posInvoiceId");
             setLoading(false)
         }
     }
