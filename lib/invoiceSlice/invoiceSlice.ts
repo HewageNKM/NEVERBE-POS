@@ -21,14 +21,19 @@ const initialState: InvoiceSlice = {
     items: []
 }
 
-const generateInvoiceId = () => {
-    // Generate a unique alphanumeric order ID with a shorter length
-    const timestamp = Date.now().toString(36).slice(-3);  // Take only the last 6 characters of the base-36 timestamp
-    const randomPart = Math.random().toString(36).substring(2, 6); // Shorter random part (2 characters)
+const generateInvoiceId = (location: "Store" | "Website") => {
+    // Short timestamp based on seconds
+    const timestamp = Math.floor(Date.now() / 1000).toString().slice(-6);
 
-    return `${timestamp}-${randomPart}`.toUpperCase();
+    // A random 3-character alphanumeric string for extra randomness
+    const randomPart = Math.random().toString(36).substring(2, 2).toLowerCase();
+
+    // Add location identifier (e.g., "st" for Store, "wb" for Website)
+    const locationPart = location === "Store" ? "st" : "wb";
+
+    // Combine parts into a final 12-character order ID
+    return `${locationPart}${timestamp}${randomPart}`.toLowerCase();
 };
-
 
 
 export const invoiceSlice = createSlice({
@@ -50,13 +55,13 @@ export const invoiceSlice = createSlice({
 
         initializeInvoicedId: (state) => {
             let invoiceId = window.localStorage.getItem("posInvoiceId");
-            if (invoiceId == null) {
-                invoiceId = generateInvoiceId()
+            if (!invoiceId) {
+                invoiceId = generateInvoiceId("Store")
                 window.localStorage.setItem("posInvoiceId", invoiceId);
             }
             state.invoiceId = invoiceId;
         },
-        setPreviewOrder: (state, action: PayloadAction<Order|null>) => {
+        setPreviewOrder: (state, action: PayloadAction<Order | null>) => {
             state.previewOrder = action.payload
         },
     },
