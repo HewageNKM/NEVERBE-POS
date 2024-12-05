@@ -32,7 +32,7 @@ const generateInvoiceId = (location: "Store" | "Website") => {
     const locationPart = location === "Store" ? "st" : "wb";
 
     // Combine parts into a final 12-character order ID
-    return `${locationPart}${timestamp}${randomPart}`;
+    return `${locationPart}${timestamp}${randomPart}`.toLowerCase();
 };
 
 
