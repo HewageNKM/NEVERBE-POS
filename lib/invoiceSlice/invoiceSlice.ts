@@ -25,14 +25,11 @@ const generateInvoiceId = (location: "Store" | "Website") => {
     // Short timestamp based on seconds
     const timestamp = Math.floor(Date.now() / 1000).toString().slice(-6);
 
-    // A random 3-character alphanumeric string for extra randomness
-    const randomPart = Math.random().toString(36).substring(2, 2).toLowerCase();
-
     // Add location identifier (e.g., "st" for Store, "wb" for Website)
     const locationPart = location === "Store" ? "st" : "wb";
 
     // Combine parts into a final 12-character order ID
-    return `${locationPart}${timestamp}${randomPart}`.toLowerCase();
+    return `ORD-${locationPart}-${timestamp}`.toLowerCase();
 };
 
 
