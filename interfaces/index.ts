@@ -19,6 +19,7 @@ export interface Item {
 export interface Payment {
     id: string;
     amount: number;
+    cardNumber:string,
     paymentMethod: string;
 }
 
@@ -68,6 +69,7 @@ export interface Order {
     paymentStatus: string,
     paymentMethod: string,
     shippingCost: number,
+    paymentReceived?:Payment[]
     from: string,
     createdAt?: string | Timestamp;
 }

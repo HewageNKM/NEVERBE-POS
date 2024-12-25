@@ -14,6 +14,7 @@ import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
 import {getProducts} from "@/lib/prodcutSlice/productSlice";
 import {Timestamp} from "@firebase/firestore";
+import {InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot} from "@/components/ui/input-otp";
 
 
 const PaymentForm = () => {
@@ -23,6 +24,7 @@ const PaymentForm = () => {
     const [payments, setPayments] = useState([] as Payment[]);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Cash");
     const [paymentAmount, setPaymentAmount] = useState("");
+    const [cardNumber, setCardNumber] = useState(null);
     const [loading, setLoading] = useState(false)
     const {toast} = useToast()
 
@@ -56,14 +58,26 @@ const PaymentForm = () => {
             });
             return;
         }
+        if(selectedPaymentMethod === "Card" && cardNumber.trim().length != 4){
+            console.log(cardNumber)
+            toast({
+                title: "Invalid Card Number",
+                description: "Please enter a valid card number.",
+                variant: "destructive",
+            });
+            return
+        }
 
         const newPayment: Payment = {
             id: `${Date.now()}`.substring(9, 11), // Unique ID based on timestamp
             amount,
             paymentMethod: selectedPaymentMethod,
+            cardNumber: cardNumber || "None",
         };
         setPayments([...payments, newPayment]);
-        setPaymentAmount(""); // Reset input
+        setSelectedPaymentMethod("Cash");
+        setPaymentAmount("");
+        setCardNumber(null);
     };
 
 
@@ -82,6 +96,7 @@ const PaymentForm = () => {
             }));
 
             let newOrder: Order = {
+                paymentReceived: payments,
                 items: orderItems,
                 orderId: (invoiceId || "").toLowerCase(),
                 paymentId: "None",
@@ -102,8 +117,8 @@ const PaymentForm = () => {
         } catch (e) {
             console.error(e);
             toast({
-                title: "Fail to place order",
-                description: e.message,
+                title: "Something went wrong",
+                description: `Can't connect to the printer or ${e.message}. Receipt won't be printed.`,
                 variant: "destructive"
             })
         } finally {
@@ -131,6 +146,7 @@ const PaymentForm = () => {
                             <TableRow>
                                 <TableHead>ID</TableHead>
                                 <TableHead>Method</TableHead>
+                                <TableHead>Card Number</TableHead>
                                 <TableHead>Amount (LKR)</TableHead>
                                 <TableHead>Action</TableHead>
                             </TableRow>
@@ -140,6 +156,7 @@ const PaymentForm = () => {
                                 <TableRow key={invoice.id}>
                                     <TableCell>{invoice.id}</TableCell>
                                     <TableCell className="capitalize">{invoice.paymentMethod}</TableCell>
+                                    <TableCell>{invoice.cardNumber}</TableCell>
                                     <TableCell>{invoice.amount}</TableCell>
                                     <TableCell>
                                         <Button
@@ -169,8 +186,7 @@ const PaymentForm = () => {
                             value={selectedPaymentMethod}
                             onValueChange={(value) => setSelectedPaymentMethod(value)}
                         >
-                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60"
-                                           onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}
+                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60" disabled={getTotal() - getItemsTotal() >= 0}
                             >
                                 <SelectValue placeholder="Select Payment Method"/>
                             </SelectTrigger>
@@ -183,6 +199,17 @@ const PaymentForm = () => {
                                 ))}
                             </SelectContent>
                         </Select>
+                        {selectedPaymentMethod === "Card" && (
+                            <InputOTP maxLength={4} onChange={(newValue)=>setCardNumber(newValue)}>
+                                <InputOTPGroup>
+                                    <InputOTPSlot index={0} />
+                                    <InputOTPSlot index={1} />
+                                    <InputOTPSeparator />
+                                    <InputOTPSlot index={2} />
+                                    <InputOTPSlot index={3} />
+                                </InputOTPGroup>
+                            </InputOTP>
+                        )}
                         <Input
                             className="disabled:cursor-not-allowed disabled:bg-opacity-60"
                             disabled={getTotal() - getItemsTotal() >= 0}
