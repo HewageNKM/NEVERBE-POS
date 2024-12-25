@@ -92,13 +92,12 @@ const PaymentForm = () => {
                 updatedAt: Timestamp.now(),
                 from: "Store",
             }
+
             await addOrder(newOrder);
             dispatch(setShowPaymentDialog(false));
             newOrder = await getAOrder(newOrder.orderId);
             await sendPrintInvoice(newOrder);
 
-            dispatch(initializeInvoicedId());
-            dispatch(getPosCartItems());
             dispatch(getProducts({size: currentSize, page: currentPage}))
         } catch (e) {
             console.error(e);
@@ -109,6 +108,8 @@ const PaymentForm = () => {
             })
         } finally {
             window.localStorage.removeItem("posInvoiceId");
+            dispatch(getPosCartItems());
+            dispatch(initializeInvoicedId());
             setLoading(false)
         }
     }
@@ -183,7 +184,7 @@ const PaymentForm = () => {
                             </SelectContent>
                         </Select>
                         <Input
-                            className="disabled:cursor-not-allowed disabled:bg-opacity-60" onClick={addPayment}
+                            className="disabled:cursor-not-allowed disabled:bg-opacity-60"
                             disabled={getTotal() - getItemsTotal() >= 0}
                             type="number"
                             placeholder="Enter payment amount"
