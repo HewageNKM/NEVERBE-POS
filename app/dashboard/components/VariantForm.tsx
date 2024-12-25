@@ -10,7 +10,7 @@ import VariantDisplayCard from "@/app/dashboard/components/VariantDisplayCard";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {reserveItem} from "@/app/actions/invoiceAction";
 import {getPosCartItems, setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
-import {getProducts, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
+import {setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 import {showAlert} from "@/lib/alertSlice/alertSlice";
 
 const VariantForm = () => {
@@ -20,7 +20,6 @@ const VariantForm = () => {
     const {
         selectedItem,
         isVariantsFormOpen,
-        currentPage
     } = useAppSelector(state => state.product);
     const dispatch = useAppDispatch();
 
@@ -47,7 +46,6 @@ const VariantForm = () => {
             const title: string = e.response?.data?.message || "An error occurred";
             dispatch(showAlert({buttonTitle: "Okay", title: title, showAlert: true}))
         } finally {
-            dispatch(getProducts({page: currentPage, size: 10}));
             dispatch(getPosCartItems());
             dispatch(setIsInvoiceLoading(false));
         }
