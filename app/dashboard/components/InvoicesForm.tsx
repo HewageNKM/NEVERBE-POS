@@ -2,12 +2,9 @@ import React, {useState} from 'react';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import InvoicePreview from "@/app/dashboard/components/PreviewInvoice";
-import {getAOrder} from "@/app/actions/invoiceAction";
+import {getAOrder, sendPrintInvoice} from "@/app/actions/invoiceAction";
 import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
-import {useAppDispatch} from "@/lib/hooks";
-import {setPreviewInvoice, setPreviewOrder} from "@/lib/invoiceSlice/invoiceSlice";
 
 const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
     setShowInvoicesForm: React.Dispatch<React.SetStateAction<boolean>>,
@@ -15,7 +12,6 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
 }) => {
     const [loading, setLoading] = useState(false)
     const [invoiceId, setInvoiceId] = useState("")
-    const dispatch = useAppDispatch();
     const {toast} = useToast()
 
 
@@ -24,15 +20,14 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
         setLoading(true)
         try {
             const fetchedOrder = await getAOrder(invoiceId.toLowerCase());
-            dispatch(setPreviewOrder(fetchedOrder))
-            dispatch(setPreviewInvoice(true))
+            await sendPrintInvoice(fetchedOrder);
             setShowInvoicesForm(false)
             evt.target.reset()
         } catch (e) {
             console.error(e)
             toast({
                 title: "Error",
-                description: e.message,
+                description: `Something went wrong ${e.message}`,
                 variant: "destructive",
             })
         } finally {
@@ -55,13 +50,12 @@ const InvoicesForm = ({showInvoicesForm, setShowInvoicesForm}: {
                                        value={invoiceId}
                                        onChange={(event) => setInvoiceId(event.target.value)}/>
                                 <Button type={"submit"}>
-                                    Get Invoice
+                                    Print Invoice
                                 </Button>
                             </form>
                         </DialogHeader>
                     </DialogContent>
                 </Dialog>)}
-            <InvoicePreview/>
         </>
     );
 };
