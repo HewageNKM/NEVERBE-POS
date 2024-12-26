@@ -9,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import LoadingScreen from "@/components/LoadingScreen";
 import { getPosCartItems, setShowPaymentDialog } from "@/lib/invoiceSlice/invoiceSlice";
 import PaymentForm from "@/app/dashboard/components/PaymentForm";
-import InvoicePreview from "@/app/dashboard/components/PreviewInvoice";
 import { collection, onSnapshot, query, where, Timestamp } from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 
@@ -110,7 +109,6 @@ const InvoiceDetails = () => {
                 </Button>
             </div>
             {showPaymentDialog && <PaymentForm />}
-            <InvoicePreview />
         </div>
     );
 };
