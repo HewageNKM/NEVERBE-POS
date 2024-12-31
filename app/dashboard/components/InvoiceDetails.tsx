@@ -24,8 +24,9 @@ const InvoiceDetails = () => {
     const [invoices, setInvoices] = useState(0);
 
     // Calculate totals
-    const subtotal = items?.reduce((acc, item) => acc + item.quantity * item.price, 0);
-    const total = subtotal;
+    const total = items?.reduce((acc, item) => acc + item.quantity * item.price, 0);
+    const discount = items?.reduce((acc, item) => acc + item.discount, 0);
+    const subtotal = total - discount;
 
     useEffect(() => {
         if (user) {
@@ -89,15 +90,15 @@ const InvoiceDetails = () => {
                 <div className="flex flex-col gap-1 mt-5">
                     <div className="flex justify-between">
                         <span className="text-lg text-gray-500 font-medium">Subtotal</span>
-                        <span className="text-lg text-blue-700 font-medium">LKR {subtotal.toFixed(2)}</span>
+                        <span className="text-lg text-blue-700 font-medium">LKR {total.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-lg text-gray-500 font-medium">Discount</span>
-                        <span className="text-lg text-blue-700 font-medium">LKR 0.00</span>
+                        <span className="text-lg text-blue-700 font-medium">LKR {discount}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-lg text-gray-500 font-medium">Total</span>
-                        <span className="text-lg text-blue-700 font-medium">LKR {total.toFixed(2)}</span>
+                        <span className="text-lg text-blue-700 font-medium">LKR {subtotal.toFixed(2)}</span>
                     </div>
                 </div>
                 <Button

@@ -12,10 +12,12 @@ import {reserveItem} from "@/app/actions/invoiceAction";
 import {getPosCartItems, setIsInvoiceLoading} from "@/lib/invoiceSlice/invoiceSlice";
 import {setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 import {showAlert} from "@/lib/alertSlice/alertSlice";
+import {Label} from "@/components/ui/label";
 
 const VariantForm = () => {
     const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null)
     const [selectedSize, setSelectedSize] = useState("")
+    const [discount, setDiscount] = useState(0)
     const [qty, setQty] = useState(1)
     const {
         selectedItem,
@@ -25,10 +27,10 @@ const VariantForm = () => {
 
     const addToCart = async () => {
         const newCartItem: CartItem = {
-            discount: selectedItem?.discount || 0,
+            discount:discount * qty,
             itemId: selectedItem?.itemId || "",
             name: selectedItem?.name || "",
-            price: selectedItem?.sellingPrice || 0,
+            price: (selectedItem?.sellingPrice || 0),
             quantity: qty,
             size: selectedSize,
             thumbnail: selectedItem?.thumbnail.url || "",
@@ -86,13 +88,23 @@ const VariantForm = () => {
                         <p
                             className="text-sm text-muted-foreground flex w-full justify-end"
                         >{selectedVariant.sizes.find(size => size.size === selectedSize)?.stock} in stock</p>
-                        <Input
-                            type="number"
-                            min="1"
-                            value={qty}
-                            onChange={(e) => setQty(parseInt(e.target.value))}
-                            placeholder="Quantity"
-                        />
+                        <div className="flex flex-col gap-5">
+                            <Label>
+                                <span>Quantity</span>
+                                <Input
+                                    className={"mt-2"}
+                                    type="number"
+                                    min="1"
+                                    value={qty}
+                                    onChange={(e) => setQty(parseInt(e.target.value))}
+                                    placeholder="Quantity"
+                                />
+                            </Label>
+                            <Label>
+                                <span>Discount</span>
+                                <Input type={"number"} className={"mt-2"} placeholder={"Discount"} value={discount.toString()} onChange={(event)=>setDiscount(Number.parseInt(event.target.value))}/>
+                            </Label>
+                        </div>
                     </div>
                 ) : (
                     <ScrollArea className="h-72 w-full rounded-md border p-4">

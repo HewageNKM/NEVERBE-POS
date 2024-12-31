@@ -33,9 +33,12 @@ const PaymentForm = () => {
     };
 
     const getItemsTotal = () => {
-        return items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
+         const total = items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
+         return total - getTotalDiscount();
     };
-
+    const getTotalDiscount = () => {
+        return items.map((item) => item.discount).reduce((acc, curr) => acc + curr, 0);
+    }
     const addPayment = () => {
         const amount = parseFloat(paymentAmount);
         if (isNaN(amount) || amount <= 0) {
@@ -103,6 +106,7 @@ const PaymentForm = () => {
                 paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
                 paymentStatus: "Paid",
                 shippingCost: 0,
+                discount: getTotalDiscount(),
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
                 from: "Store",
@@ -232,6 +236,9 @@ const PaymentForm = () => {
                             {getItemsTotal() - getTotal() > 0 ? "Due" : "Balance"}: LKR{" "}
                             {Math.abs(getItemsTotal() - getTotal())}
                         </h3>
+                        <h4 className={`text-xl font-bold text-yellow-500 `}>
+                            Discount: LKR {getTotalDiscount()}
+                        </h4>
                     </div>
                 </div>
                 <DialogFooter className="mt-4 flex justify-between">
@@ -249,7 +256,7 @@ const PaymentForm = () => {
                         onClick={() => placeOrder()}
                     >
                         Confirm
-                    </Button>
+                    </Button>hds
                 </DialogFooter>
             </DialogContent>)}
         </Dialog>
