@@ -256,7 +256,7 @@ const PaymentForm = () => {
                         onClick={() => placeOrder()}
                     >
                         Confirm
-                    </Button>hds
+                    </Button>
                 </DialogFooter>
             </DialogContent>)}
         </Dialog>
