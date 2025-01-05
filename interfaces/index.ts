@@ -64,7 +64,7 @@ export interface OrderItem {
 
 export interface Order {
     orderId: string,
-    paymentId: string,
+    paymentId?: string,
     items: OrderItem[],
     paymentStatus: string,
     paymentMethod: string,
