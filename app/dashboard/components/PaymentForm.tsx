@@ -105,10 +105,8 @@ const PaymentForm = () => {
                 paymentId: "None",
                 paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
                 paymentStatus: "Paid",
-                shippingCost: 0,
                 discount: getTotalDiscount(),
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now(),
+                createdAt: new Date().toLocaleString(),
                 from: "Store",
             }
 

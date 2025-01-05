@@ -68,7 +68,6 @@ export interface Order {
     items: OrderItem[],
     paymentStatus: string,
     paymentMethod: string,
-    shippingCost: number,
     discount: number,
     paymentReceived?:Payment[]
     from: string,

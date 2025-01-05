@@ -42,22 +42,21 @@ export const getUserById = async (uid: string) => {
 export const addNewOrder = async (order: Order) => {
     console.log("Attempting to add new order Id:", order.orderId);
 
-    const db = adminFirestore;
     if (!order || typeof order !== "object") {
         throw new Error("Invalid payload: Payload must be an object.");
     }
 
     try {
+        const createdAtDate = new Date(order.createdAt);
         const updatedOrder: Order = {
             ...order,
-            createdAt: admin.firestore.Timestamp.now(),
-            updatedAt: admin.firestore.Timestamp.now(),
+            createdAt: admin.firestore.Timestamp.fromDate(createdAtDate),
         };
 
         console.log("Updated Order Object:", updatedOrder);
 
-        await db.runTransaction(async (transaction) => {
-            const ordersCollection = db.collection("orders");
+        await adminFirestore.runTransaction(async (transaction) => {
+            const ordersCollection = adminFirestore.collection("orders");
             const orderRef = ordersCollection.doc(order.orderId);
 
             console.log("Checking if order exists:", orderRef.path);
@@ -72,9 +71,9 @@ export const addNewOrder = async (order: Order) => {
 
         console.log("New order added successfully.");
 
-        const posCartSnapshot = await db.collection("posCart").get();
+        const posCartSnapshot = await adminFirestore.collection("posCart").get();
         if (!posCartSnapshot.empty) {
-            const batch = db.batch();
+            const batch = adminFirestore.batch();
             posCartSnapshot.docs.forEach((doc) => {
                 if (!doc.ref) {
                     console.error("Invalid document reference in posCart:", doc);
@@ -94,6 +93,7 @@ export const addNewOrder = async (order: Order) => {
     }
 };
 
+
 export const getAOrder = async (orderId: string) => {
     console.log(`Attempting to retrieve order with ID: ${orderId}`);
     try {
@@ -109,9 +109,8 @@ export const getAOrder = async (orderId: string) => {
         console.log(`Order with ID ${orderId} retrieved successfully.`);
 
         const orderData = order.data() as Order;
-        const updatedOrder:Order = {
+        const updatedOrder: Order = {
             ...orderData,
-            updatedAt: orderData?.createdAt?.toDate().toLocaleString(),
             createdAt: orderData?.createdAt?.toDate().toLocaleString(),
         }
         return updatedOrder;
