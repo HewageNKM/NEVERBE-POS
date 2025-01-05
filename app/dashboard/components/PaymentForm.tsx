@@ -13,7 +13,6 @@ import {addOrder, getAOrder, sendPrintInvoice} from "@/app/actions/invoiceAction
 import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
 import {getProducts} from "@/lib/prodcutSlice/productSlice";
-import {Timestamp} from "@firebase/firestore";
 import {InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot} from "@/components/ui/input-otp";
 
 
@@ -33,8 +32,8 @@ const PaymentForm = () => {
     };
 
     const getItemsTotal = () => {
-         const total = items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
-         return total - getTotalDiscount();
+        const total = items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
+        return total - getTotalDiscount();
     };
     const getTotalDiscount = () => {
         return items.map((item) => item.discount).reduce((acc, curr) => acc + curr, 0);
@@ -61,7 +60,7 @@ const PaymentForm = () => {
             });
             return;
         }
-        if(selectedPaymentMethod === "Card" && cardNumber.trim().length != 4){
+        if (selectedPaymentMethod === "Card" && cardNumber.trim().length != 4) {
             console.log(cardNumber)
             toast({
                 title: "Invalid Card Number",
@@ -187,7 +186,8 @@ const PaymentForm = () => {
                             value={selectedPaymentMethod}
                             onValueChange={(value) => setSelectedPaymentMethod(value)}
                         >
-                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60" disabled={getTotal() - getItemsTotal() >= 0}
+                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60"
+                                           disabled={getTotal() - getItemsTotal() >= 0}
                             >
                                 <SelectValue placeholder="Select Payment Method"/>
                             </SelectTrigger>
@@ -201,13 +201,13 @@ const PaymentForm = () => {
                             </SelectContent>
                         </Select>
                         {selectedPaymentMethod === "Card" && (
-                            <InputOTP maxLength={4} onChange={(newValue)=>setCardNumber(newValue)}>
+                            <InputOTP maxLength={4} onChange={(newValue) => setCardNumber(newValue)}>
                                 <InputOTPGroup>
-                                    <InputOTPSlot index={0} />
-                                    <InputOTPSlot index={1} />
-                                    <InputOTPSeparator />
-                                    <InputOTPSlot index={2} />
-                                    <InputOTPSlot index={3} />
+                                    <InputOTPSlot index={0}/>
+                                    <InputOTPSlot index={1}/>
+                                    <InputOTPSeparator/>
+                                    <InputOTPSlot index={2}/>
+                                    <InputOTPSlot index={3}/>
                                 </InputOTPGroup>
                             </InputOTP>
                         )}
