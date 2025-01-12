@@ -26,11 +26,14 @@ const VariantForm = () => {
     const dispatch = useAppDispatch();
 
     const addToCart = async () => {
+        console.log(selectedItem)
+        const price = Math.round(((selectedItem?.sellingPrice || 0) - ((selectedItem?.discount || 0) * (selectedItem?.sellingPrice || 0) / 100)) / 10) * 10
+        console.log(price)
         const newCartItem: CartItem = {
-            discount:discount * qty,
+            discount: discount * qty,
             itemId: selectedItem?.itemId || "",
             name: selectedItem?.name || "",
-            price: (selectedItem?.sellingPrice || 0),
+            price: price,
             quantity: qty,
             size: selectedSize,
             thumbnail: selectedItem?.thumbnail.url || "",
@@ -102,7 +105,9 @@ const VariantForm = () => {
                             </Label>
                             <Label>
                                 <span>Discount</span>
-                                <Input type={"number"} className={"mt-2"} placeholder={"Discount"} value={discount.toString()} onChange={(event)=>setDiscount(Number.parseInt(event.target.value))}/>
+                                <Input type={"number"} className={"mt-2"} placeholder={"Discount"}
+                                       value={discount.toString()}
+                                       onChange={(event) => setDiscount(Number.parseInt(event.target.value))}/>
                             </Label>
                         </div>
                     </div>
