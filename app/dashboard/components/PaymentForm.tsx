@@ -104,7 +104,7 @@ const PaymentForm = () => {
                 paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
                 paymentStatus: "Paid",
                 discount: getTotalDiscount(),
-                createdAt: new Date().toLocaleString(),
+                createdAt: new Date().toISOString(),
                 from: "Store",
             }
 

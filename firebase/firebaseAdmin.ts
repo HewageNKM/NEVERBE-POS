@@ -132,7 +132,7 @@ export const getInventory = async (page: number = 1, size: number = 20) => {
                 ...item
             } as Item);
         });
-        console.log("Inventory retrieved successfully:", inventoryData);
+        console.log("Inventory retrieved successfully", items.length);
         return items;
     } catch (error) {
         console.error("Error retrieving inventory:", error);
@@ -167,7 +167,7 @@ export const getPosCart = async () => {
         console.log("Attempting to retrieve POS cart...");
         const cartSnapshot = await posCartCollection.get();
         const cartData = cartSnapshot.docs.map(doc => doc.data() as CartItem);
-        console.log("POS cart retrieved successfully:", cartData);
+        console.log("POS cart retrieved successfully:",cartData.length);
         return cartData;
     } catch (error) {
         console.error("Error retrieving POS cart:", error);
@@ -328,7 +328,7 @@ export const verifyIdToken = async (token: string) => {
     console.log("Attempting to verify token...");
     try {
         const decodedToken = await adminAuth.verifyIdToken(token);
-        console.log("Token verification successful:", decodedToken);
+        console.log("Token verification successful");
         return decodedToken;
     } catch (error) {
         console.error("Token verification failed:", error);
@@ -363,3 +363,4 @@ export const authenticateUserPassword = async (user) => {
         throw error;
     }
 }
+

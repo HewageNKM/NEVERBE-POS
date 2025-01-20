@@ -13,7 +13,7 @@ export const authorizeRequest = async (req: NextRequest) => {
     try {
         // Verify the token
         const idToken = await verifyIdToken(token);
-        console.log("Token verification successful:", idToken);
+        console.log("Token verification successful:", idToken.uid);
 
         // Retrieve user by ID
         const user = await getUserById(idToken.uid);
