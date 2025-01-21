@@ -91,7 +91,7 @@ export const sendPrintInvoice = async (order: Order) => {
     try {
         const res = await axios({
             method: 'POST',
-            url: `http://localhost:4444/print`,
+            url: `http://localhost:4444/api/v1/printer/print`,
             headers:{
                 "Content-Type": "application/json"
             },
@@ -106,7 +106,7 @@ export const openDrawer = async()  => {
     try {
         const res = await axios({
             method: 'GET',
-            url: `http://localhost:4444/drawer`,
+            url: `http://localhost:4444/api/v1/printer/drawer`,
         });
         return res.data;
     } catch (e) {
