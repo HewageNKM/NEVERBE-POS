@@ -16,6 +16,15 @@ export interface Item {
     discount: number,
 }
 
+export interface PaymentMethod {
+    paymentId:string
+    name: string
+    status: string
+    fee: number
+    available: string[]
+    createdAt: string | Timestamp
+}
+
 export interface Payment {
     id: string;
     amount: number;

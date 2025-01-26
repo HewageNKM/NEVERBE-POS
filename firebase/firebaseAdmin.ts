@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {CartItem, Item, Order, User} from "@/interfaces";
+import {CartItem, Item, Order, PaymentMethod, User} from "@/interfaces";
 import {createHash} from "node:crypto";
 
 // Initialize Firebase Admin SDK if it hasn't been initialized already
@@ -167,7 +167,7 @@ export const getPosCart = async () => {
         console.log("Attempting to retrieve POS cart...");
         const cartSnapshot = await posCartCollection.get();
         const cartData = cartSnapshot.docs.map(doc => doc.data() as CartItem);
-        console.log("POS cart retrieved successfully:",cartData.length);
+        console.log("POS cart retrieved successfully:", cartData.length);
         return cartData;
     } catch (error) {
         console.error("Error retrieving POS cart:", error);
@@ -323,6 +323,26 @@ export const removeFromPosCart = async (item: CartItem) => {
     }
 };
 
+export const getAllPaymentMethods = async () => {
+    try {
+        const paymentList:PaymentMethod[] = [];
+        const querySnapshot = await adminFirestore.collection('paymentMethods').where("status", "==", "Active").where("available", "array-contains", "Store").get();
+        querySnapshot.forEach((doc) => {
+                paymentList.push({
+                    paymentId: doc.id,
+                    name: doc.data().name,
+                    status: doc.data().status,
+                    fee: doc.data().fee,
+                    available: doc.data().available,
+                    createdAt: doc.data().createdAt.toDate().toLocaleString(),
+                } as PaymentMethod);
+            }
+        );
+        return paymentList;
+    } catch (e) {
+        throw e;
+    }
+}
 
 export const verifyIdToken = async (token: string) => {
     console.log("Attempting to verify token...");

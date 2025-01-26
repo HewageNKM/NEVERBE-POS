@@ -1,5 +1,5 @@
 "use client";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getPosCartItems, initializeInvoicedId, setShowPaymentDialog} from "@/lib/invoiceSlice/invoiceSlice";
@@ -7,13 +7,13 @@ import {Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableR
 import {Button} from "@/components/ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {Input} from "@/components/ui/input";
-import {PaymentMethods} from "@/constant";
-import {Order, OrderItem, Payment} from "@/interfaces";
+import {Order, OrderItem, Payment, PaymentMethod} from "@/interfaces";
 import {addOrder, getAOrder, sendPrintInvoice} from "@/app/actions/invoiceAction";
 import {useToast} from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
 import {getProducts} from "@/lib/prodcutSlice/productSlice";
 import {InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot} from "@/components/ui/input-otp";
+import {getPOSPaymentMethods} from "@/app/actions/paymentsAction";
 
 
 const PaymentForm = () => {
@@ -25,6 +25,7 @@ const PaymentForm = () => {
     const [paymentAmount, setPaymentAmount] = useState("");
     const [cardNumber, setCardNumber] = useState(null);
     const [loading, setLoading] = useState(false)
+    const [paymentMethods, setPaymentMethods] = useState([])
     const {toast} = useToast()
 
     const getTotal = () => {
@@ -128,6 +129,20 @@ const PaymentForm = () => {
             setLoading(false)
         }
     }
+
+    const fetchPaymentMethod = async () => {
+        try {
+            const methods: PaymentMethod = await getPOSPaymentMethods();
+            setPaymentMethods(methods)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    useEffect(() => {
+        fetchPaymentMethod()
+    }, [])
+
     return (
         <Dialog
             open={showPaymentDialog}
@@ -193,9 +208,9 @@ const PaymentForm = () => {
                             </SelectTrigger>
                             <SelectContent
                             >
-                                {PaymentMethods.map((method) => (
-                                    <SelectItem key={method.value} value={method.value}>
-                                        {method.label}
+                                {paymentMethods.map((method: PaymentMethod) => (
+                                    <SelectItem key={method.name} value={method.name}>
+                                        {method.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
