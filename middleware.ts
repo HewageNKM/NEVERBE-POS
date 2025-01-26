@@ -9,7 +9,7 @@ export function middleware(req:Request) {
         return NextResponse.next(); // Allow the request
     }
 
-    if (origin === 'https://www.neverbe.lk') {
+    if (origin === 'https://pos.neverbe.lk') {
         // Cross-origin request from allowed origin
         console.log(`Allowed: Cross-origin request from ${origin}`);
         return NextResponse.next(); // Allow the request
