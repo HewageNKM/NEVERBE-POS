@@ -215,7 +215,7 @@ const PaymentForm = () => {
                                 ))}
                             </SelectContent>
                         </Select>
-                        {selectedPaymentMethod === "Card" && (
+                        {selectedPaymentMethod.toLowerCase() === "card" && (
                             <InputOTP maxLength={4} onChange={(newValue) => setCardNumber(newValue)}>
                                 <InputOTPGroup>
                                     <InputOTPSlot index={0}/>
