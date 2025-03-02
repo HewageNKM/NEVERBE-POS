@@ -30,7 +30,7 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
             <CardContent className="flex flex-col justify-between flex-grow p-4">
                 <h3 className="text-lg font-semibold truncate">{item.name}</h3>
                 <p className="text-sm capitalize">{item.brand}</p>
-                <p className="text-sm mt-2">LKR {Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10} <span className="p-1 rounded text-white bg-yellow-800">-({item.discount.toFixed(0)}OFF)</span></p>
+                <p className="text-sm mt-2">LKR {item.sellingPrice.toFixed(2)} <span className="p-1 rounded text-white bg-yellow-800">-({item.discount.toFixed(0)}OFF)</span></p>
             </CardContent>
 
             {/* Action Section (e.g., Add to Cart Button) */}
