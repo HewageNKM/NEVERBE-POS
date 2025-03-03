@@ -68,7 +68,6 @@ const InvoiceDetails = () => {
             <div className="flex flex-col w-full gap-5">
                 <div className="flex-row flex items-center justify-between w-full">
                     <Profile/>
-                    <LiveClock/>
                 </div>
             </div>
             <h1 className="text-2xl font-bold mt-5">Invoice Details</h1>

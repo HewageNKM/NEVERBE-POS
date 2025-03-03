@@ -8,6 +8,7 @@ import {LogOut, Mail} from 'lucide-react';
 import {useRouter} from "next/navigation";
 import {clearUser} from "@/lib/authSlice/authSlice";
 import {auth} from "@/firebase/firebaseClient";
+import LiveClock from "@/components/LiveClock";
 
 const Profile = () => {
     const {user} = useAppSelector(state => state.auth);
@@ -29,32 +30,39 @@ const Profile = () => {
     }
 
     return (
-        <Card className="w-fit h-fit">
+        <Card className="w-full h-fit">
             <CardContent className="pt-6">
-                <div className="flex flex-row gap-4">
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={user?.imageUrl} alt={user?.username}/>
-                            <AvatarFallback>{getInitials(user?.username)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                            <p className="font-medium">{user?.username}</p>
-                            {user?.email && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Mail className="h-3 w-3"/>
-                                    <span>{user.email}</span>
-                                </div>
-                            )}
+                <div
+                    className={`flex flex-col gap-4 p-4 rounded-lg  shadow-md dark:shadow-none transition-colors`}
+                >
+                    <div className="flex flex-row gap-4 justify-between">
+                        <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                                <AvatarImage src={user?.imageUrl} alt={user?.username}/>
+                                <AvatarFallback>{getInitials(user?.username)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                                <p className="font-medium">{user?.username}</p>
+                                {user?.email && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <Mail className="h-3 w-3"/>
+                                        <span>{user.email}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={logout}
+                                className="w-full flex items-center gap-2"
+                            >
+                                <LogOut className="h-4 w-4"/>
+                            </Button>
                         </div>
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={logout}
-                        className="w-full flex items-center gap-2"
-                    >
-                        <LogOut className="h-4 w-4"/>
-                    </Button>
+                    <LiveClock/>
                 </div>
             </CardContent>
         </Card>

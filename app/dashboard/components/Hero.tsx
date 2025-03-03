@@ -7,14 +7,11 @@ import DarkModeSelector from "@/components/DarkModeSelector";
 import InvoicesForm from "@/app/dashboard/components/InvoicesForm";
 import {useAppDispatch} from "@/lib/hooks";
 import {setIsLoading, setProducts} from "@/lib/prodcutSlice/productSlice";
-import {BsCash} from "react-icons/bs";
-import UserAuthenticateDialog from "@/app/dashboard/components/UserAuthenticateDialog";
 import {algoliasearch} from "algoliasearch";
 import {Item} from "@/interfaces";
 
 const Hero = () => {
     const [showInvoicesForm, setShowInvoicesForm] = useState(false);
-    const [userAuthDialog, setUserAuthDialog] = useState(false)
     const [query, setQuery] = useState("")
     const client = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY);
 
@@ -24,7 +21,7 @@ const Hero = () => {
         dispatch(setIsLoading(true));
         try {
             const results = await client.search({requests: [{indexName: "inventory_index", query}]});
-            const filterInactives = results.results[0].hits.filter((item:Item) => item.status === "Active");
+            const filterInactives = results.results[0].hits.filter((item: Item) => item.status === "Active");
             dispatch(setProducts(filterInactives));
             evt.target.reset();
         } catch (e) {
@@ -44,13 +41,10 @@ const Hero = () => {
                 </form>
             </header>
             <div className="flex font-bold flex-row gap-3">
-                <Button onClick={() => setUserAuthDialog(true)}><BsCash/>Drawer</Button>
                 <Button onClick={() => setShowInvoicesForm(true)}>Invoices</Button>
                 <DarkModeSelector/>
             </div>
             <InvoicesForm showInvoicesForm={showInvoicesForm} setShowInvoicesForm={setShowInvoicesForm}/>
-            <UserAuthenticateDialog showUserAuthDialog={userAuthDialog}
-                                    setShowUserAuthDialog={() => setUserAuthDialog(false)}/>
         </div>
     );
 };

@@ -21,8 +21,9 @@ const PaymentForm = () => {
     const {items, invoiceId, showPaymentDialog} = useAppSelector((state) => state.invoice);
     const {currentSize, currentPage} = useAppSelector((state) => state.product);
     const [payments, setPayments] = useState([] as Payment[]);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Cash");
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cash");
     const [paymentAmount, setPaymentAmount] = useState("");
+    const [fee, setFee] = useState(0)
     const [cardNumber, setCardNumber] = useState(null);
     const [loading, setLoading] = useState(false)
     const [paymentMethods, setPaymentMethods] = useState([])
@@ -33,15 +34,22 @@ const PaymentForm = () => {
     };
 
     const getItemsTotal = () => {
-        const total = items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
-        return total - getTotalDiscount();
+        return items.map((item) => item.quantity * item.price).reduce((acc, curr) => acc + curr, 0);
     };
     const getTotalDiscount = () => {
         return items.map((item) => item.discount).reduce((acc, curr) => acc + curr, 0);
     }
+    const getFee = () => {
+        return parseFloat(((items.reduce((acc, item) => acc + item.quantity * item.price, 0) - getTotalDiscount() - getTotal()) * fee / 100).toFixed(2))
+    }
+
+    const getSubtotal = () => {
+        return getItemsTotal() - getTotalDiscount() + getFee()
+    }
+
     const addPayment = () => {
         const amount = parseFloat(paymentAmount);
-        if (isNaN(amount) || amount <= 0) {
+        if (isNaN(amount) || amount < 0) {
             toast({
                 title: "Invalid Amount",
                 description: "Please enter a valid amount.",
@@ -50,10 +58,9 @@ const PaymentForm = () => {
             return;
         }
 
-        const dueAmount = getItemsTotal() - getTotal();
-
         // Validate payment amount based on the selected payment method
-        if (["Card", "Bank Transfer", "QR"].includes(selectedPaymentMethod) && amount > dueAmount) {
+        const dueAmount = getSubtotal() - getTotal();
+        if (["card", "bank transfer", "qr"].includes(selectedPaymentMethod.toLowerCase()) && amount > dueAmount) {
             toast({
                 title: "Invalid Amount",
                 description: "Amount exceeds due amount.",
@@ -61,7 +68,8 @@ const PaymentForm = () => {
             });
             return;
         }
-        if (selectedPaymentMethod === "Card" && cardNumber.trim().length != 4) {
+
+        if (selectedPaymentMethod.toLowerCase() === "card" && cardNumber.trim().length != 4) {
             console.log(cardNumber)
             toast({
                 title: "Invalid Card Number",
@@ -78,9 +86,10 @@ const PaymentForm = () => {
             cardNumber: cardNumber || "None",
         };
         setPayments([...payments, newPayment]);
-        setSelectedPaymentMethod("Cash");
+        setSelectedPaymentMethod("cash");
         setPaymentAmount("");
         setCardNumber(null);
+        setFee(0)
     };
 
 
@@ -102,7 +111,7 @@ const PaymentForm = () => {
                 paymentReceived: payments,
                 items: orderItems,
                 orderId: (invoiceId || "").toLowerCase(),
-                paymentMethod: items.length > 0 ? payments[0].paymentMethod : "Mixed",
+                paymentMethod: items.length > 1 ? "MIXED" : payments[0].paymentMethod,
                 paymentStatus: "Paid",
                 discount: getTotalDiscount(),
                 createdAt: new Date().toISOString(),
@@ -199,58 +208,94 @@ const PaymentForm = () => {
                     <div className="flex flex-col gap-3">
                         <Select
                             value={selectedPaymentMethod}
-                            onValueChange={(value) => setSelectedPaymentMethod(value)}
+                            onValueChange={(value) => {
+                                setSelectedPaymentMethod(value)
+                                setFee(paymentMethods.find((method: PaymentMethod) => method.name.toLowerCase() === value.toLowerCase())?.fee || 0)
+                            }}
                         >
-                            <SelectTrigger className="disabled:cursor-not-allowed disabled:bg-opacity-60"
-                                           disabled={getTotal() - getItemsTotal() >= 0}
+                            <SelectTrigger
                             >
                                 <SelectValue placeholder="Select Payment Method"/>
                             </SelectTrigger>
                             <SelectContent
                             >
                                 {paymentMethods.map((method: PaymentMethod) => (
-                                    <SelectItem key={method.name} value={method.name}>
+                                    <SelectItem key={method.name} value={method.name.toLowerCase()}>
                                         {method.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                         {selectedPaymentMethod.toLowerCase() === "card" && (
-                            <InputOTP maxLength={4} onChange={(newValue) => setCardNumber(newValue)}>
-                                <InputOTPGroup>
-                                    <InputOTPSlot index={0}/>
-                                    <InputOTPSlot index={1}/>
-                                    <InputOTPSeparator/>
-                                    <InputOTPSlot index={2}/>
-                                    <InputOTPSlot index={3}/>
-                                </InputOTPGroup>
-                            </InputOTP>
+                            <div className="flex flex-col gap-1">
+                                <label>Card Number</label>
+                                <InputOTP maxLength={4} onChange={(newValue) => setCardNumber(newValue)}>
+                                    <InputOTPGroup>
+                                        <InputOTPSlot index={0}/>
+                                        <InputOTPSlot index={1}/>
+                                        <InputOTPSeparator/>
+                                        <InputOTPSlot index={2}/>
+                                        <InputOTPSlot index={3}/>
+                                    </InputOTPGroup>
+                                </InputOTP>
+                            </div>
+                        )}
+                        {selectedPaymentMethod.toLowerCase() === "koko" && (
+                            <Input
+                                type="text"
+                                placeholder="Koko Order ID"
+                                value={cardNumber || ""}
+                                onChange={(e) => setCardNumber(e.target.value)}
+                            />
                         )}
                         <Input
                             className="disabled:cursor-not-allowed disabled:bg-opacity-60"
-                            disabled={getTotal() - getItemsTotal() >= 0}
                             type="number"
                             placeholder="Enter payment amount"
                             value={paymentAmount}
                             onChange={(e) => setPaymentAmount(e.target.value)}
                         />
                         <Button className="self-end disabled:cursor-not-allowed disabled:bg-opacity-60"
-                                onClick={addPayment} disabled={getTotal() - getItemsTotal() >= 0}>
+                                onClick={addPayment}>
                             Add Payment
                         </Button>
                     </div>
-                    <div className="text-right mt-3">
-                        <h3
-                            className={`text-2xl font-bold ${
-                                getItemsTotal() - getTotal() > 0 ? "text-red-500" : "text-green-500"
-                            }`}
-                        >
-                            {getItemsTotal() - getTotal() > 0 ? "Due" : "Balance"}: LKR{" "}
-                            {Math.abs(getItemsTotal() - getTotal())}
-                        </h3>
-                        <h4 className={`text-xl font-bold text-yellow-500 `}>
-                            Discount: LKR {getTotalDiscount()}
-                        </h4>
+                    <div className="mt-3">
+                        <Table>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell className="text-right font-bold">Fee({fee}%)</TableCell>
+                                    <TableCell className="text-right text-red-500">{getFee().toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="text-right font-bold">Discount</TableCell>
+                                    <TableCell
+                                        className="text-right text-yellow-500">-{getTotalDiscount().toFixed(2)}</TableCell>
+                                </TableRow>
+                                {selectedPaymentMethod.toLowerCase() != "koko" && (
+                                    <TableRow>
+                                        <TableCell
+                                            className={`text-right font-bold ${getItemsTotal() - getTotalDiscount() - getTotal() > 0 ? "text-red-500" : "text-green-500"}`}>
+                                            {getItemsTotal() - getTotalDiscount() - getTotal() > 0 ? "Due" : "Change"}
+                                        </TableCell>
+                                        <TableCell
+                                            className={`text-right ${getItemsTotal() - getTotalDiscount() - getTotal() > 0 ? "text-red-500" : "text-green-500"}`}>
+                                            {(getItemsTotal() - getTotalDiscount() - getTotal()).toFixed(2)}
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                                <TableRow>
+                                    <TableCell
+                                        className={`text-right font-bold ${getSubtotal() - getTotal() > 0 ? "text-red-500" : "text-green-500"}`}>
+                                        {getSubtotal() - getTotal() > 0 ? "Due" : "Change"}
+                                    </TableCell>
+                                    <TableCell
+                                        className={`text-right ${getSubtotal() - getTotal() > 0 ? "text-red-500" : "text-green-500"}`}>
+                                        {(getSubtotal() - getTotal()).toFixed(2)}
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     </div>
                 </div>
                 <DialogFooter className="mt-4 flex justify-between">
@@ -264,7 +309,7 @@ const PaymentForm = () => {
                         Close
                     </Button>
                     <Button
-                        disabled={getTotal() < getItemsTotal()}
+                        disabled={getTotal() < getSubtotal()}
                         onClick={() => placeOrder()}
                     >
                         Confirm

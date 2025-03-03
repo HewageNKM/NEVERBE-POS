@@ -102,14 +102,3 @@ export const sendPrintInvoice = async (order: Order) => {
         throw e;
     }
 }
-export const openDrawer = async()  => {
-    try {
-        const res = await axios({
-            method: 'GET',
-            url: `http://localhost:4444/api/v1/printer/drawer`,
-        });
-        return res.data;
-    } catch (e) {
-        throw e;
-    }
-}
