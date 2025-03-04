@@ -109,15 +109,21 @@ const PaymentForm = () => {
 
             let newOrder: Order = {
                 paymentReceived: payments,
+                fee: 0,
                 items: orderItems,
                 orderId: (invoiceId || "").toLowerCase(),
-                paymentMethod: items.length > 1 ? "MIXED" : payments[0].paymentMethod,
+                paymentMethod: payments.length > 1 ? "MIXED" : payments[0].paymentMethod.toUpperCase(),
                 paymentStatus: "Paid",
                 discount: getTotalDiscount(),
                 createdAt: new Date().toISOString(),
                 from: "Store",
             }
-
+            if(payments.length > 1) {
+               const itemsTotal = getItemsTotal() - getTotalDiscount();
+               const receivedAmount = payments.map((invoice) => invoice.amount).reduce((acc, curr) => acc + curr, 0);
+               console.log(receivedAmount, itemsTotal)
+                newOrder.fee = receivedAmount - itemsTotal;
+            }
             await addOrder(newOrder);
             dispatch(setShowPaymentDialog(false));
             newOrder = await getAOrder(newOrder.orderId);
