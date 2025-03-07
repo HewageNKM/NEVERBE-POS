@@ -59,6 +59,9 @@ const Products = () => {
                             </li>
                         ))}
                     </ul>
+                    <button onClick={() => setShowForm(true)}>
+                        Show Form
+                    </button>
                     {products.length === 0 && (
                         <p className="text-center text-lg text-gray-500 mt-5">No products to display</p>
                     )}

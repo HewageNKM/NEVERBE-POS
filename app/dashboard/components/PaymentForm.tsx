@@ -118,10 +118,12 @@ const PaymentForm = () => {
                 createdAt: new Date().toISOString(),
                 from: "Store",
             }
-            if(payments.length > 1) {
+
+            const find = payments.find((payment) => payment.paymentMethod.toLowerCase() === "koko");
+
+            if(find) {
                const itemsTotal = getItemsTotal() - getTotalDiscount();
                const receivedAmount = payments.map((invoice) => invoice.amount).reduce((acc, curr) => acc + curr, 0);
-               console.log(receivedAmount, itemsTotal)
                 newOrder.fee = receivedAmount - itemsTotal;
             }
             await addOrder(newOrder);
