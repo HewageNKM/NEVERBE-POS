@@ -30,7 +30,7 @@ const ItemCard = ({item, onAdd}: { item: Item, onAdd: () => void }) => {
             <CardContent className="flex flex-col justify-between flex-grow p-4">
                 <h3 className="text-lg font-semibold truncate">{item.name}</h3>
                 <p className="text-sm capitalize">{item.brand}</p>
-                <p className="text-sm mt-2">LKR {item.sellingPrice.toFixed(2)} {item.discount > 0 && (<span className="p-1 rounded text-white bg-yellow-300">-Extra ({item.discount.toFixed(0)}OFF)</span>)}</p>
+                <p className="text-sm mt-2">LKR {item.sellingPrice.toFixed(2)} {item.discount > 0 && (<span className="p-1 rounded text-white bg-yellow-600">-Extra ({item.discount.toFixed(0)}OFF)</span>)}</p>
             </CardContent>
 
             {/* Action Section (e.g., Add to Cart Button) */}
