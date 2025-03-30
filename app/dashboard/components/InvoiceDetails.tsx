@@ -64,7 +64,7 @@ const InvoiceDetails = () => {
     };
 
     return (
-        <div className="flex pt-1 px-2 relative items-center w-full min-h-[93vh] col-span-2 flex-col">
+        <div className="flex pt-1 px-2 relative items-center w-full min-h-[100vh] col-span-2 flex-col">
             <div className="flex flex-col w-full gap-5">
                 <div className="flex-row flex items-center justify-between w-full">
                     <Profile/>
@@ -80,13 +80,14 @@ const InvoiceDetails = () => {
                 </div>
                 <div className="border-t-2 w-full"/>
             </div>
-            <ScrollArea className="w-full flex flex-col gap-2 relative min-h-[50vh]">
+            <ScrollArea className="w-full flex flex-col gap-2 relative min-h-[50vh] max-h-[50vh] overflow-y-auto">
                 {items.map((item, index) => (
                     <CartItemCard key={index} item={item}/>
                 ))}
                 {isInvoiceLoading && <LoadingScreen type={"component"}/>}
             </ScrollArea>
-            <div className="w-full flex flex-col bottom-2 px-2 absolute">
+
+            <div className="w-full flex flex-col px-2 mt-5">
                 <div className="border-t-2 w-full"/>
                 <div className="flex flex-col gap-1 mt-5">
                     <div className="flex justify-between">
