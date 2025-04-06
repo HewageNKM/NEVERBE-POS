@@ -98,6 +98,7 @@ const PaymentForm = () => {
         try {
             const orderItems: OrderItem[] = items.map((item) => ({
                 itemId: item.itemId,
+                bPrice: item.bPrice,
                 variantId: item.variantId,
                 name: item.name,
                 variantName: item.variantName,

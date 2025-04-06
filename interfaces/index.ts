@@ -13,6 +13,7 @@ export interface Item {
     status: "Active" | "Inactive",
     name: string,
     sellingPrice: number,
+    buyingPrice: number,
     discount: number,
 }
 
@@ -58,6 +59,7 @@ export interface CartItem {
     type: string,
     quantity: number,
     price: number,
+    bPrice: number,
 }
 
 export interface OrderItem {
@@ -68,6 +70,7 @@ export interface OrderItem {
     size: string,
     quantity: number,
     price: number,
+    bPrice: number,
     discount: number,
 }
 

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export function middleware(req:Request) {
     const origin = req.headers.get('origin');
 
-    if (!origin) {
+  /*  if (!origin) {
         // No Origin header indicates a same-origin request
         console.log('Allowed: Same-origin request');
         return NextResponse.next(); // Allow the request
@@ -17,7 +17,8 @@ export function middleware(req:Request) {
 
     // Block requests from other origins
     console.log(`Blocked: Request from unknown origin: ${origin}`);
-    return new NextResponse('Forbidden', { status: 403 });
+    return new NextResponse('Forbidden', { status: 403 });*/
+    return NextResponse.next();
 }
 
 // Apply the middleware to all API routes
