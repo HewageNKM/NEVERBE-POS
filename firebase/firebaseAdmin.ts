@@ -257,7 +257,6 @@ export const addItemToPosCart = async (item: CartItem) => {
     }
 };
 
-
 export const removeFromPosCart = async (item: CartItem) => {
     console.log("Attempting to remove item from POS cart...");
     const inventoryRef = adminFirestore.collection("inventory").doc(item.itemId);
@@ -279,7 +278,7 @@ export const removeFromPosCart = async (item: CartItem) => {
                 throw new Error("Variant not found");
             }
 
-            const size = variant?.sizes.find(size => size.size === item.size);
+            const size = variant.sizes.find(size => size.size === item.size);
             if (!size) {
                 console.warn(`Size ${item.size} not found.`);
                 throw new Error("Size not found");
@@ -290,19 +289,19 @@ export const removeFromPosCart = async (item: CartItem) => {
                 if (variant.variantId === item.variantId) {
                     return {
                         ...variant,
-                        sizes: variant.sizes.map(size => {
-                            if (size.size === item.size) {
-                                return {...size, stock: size.stock + item.quantity};
+                        sizes: variant.sizes.map(sizeObj => {
+                            if (sizeObj.size === item.size) {
+                                return { ...sizeObj, stock: sizeObj.stock + item.quantity };
                             }
-                            return size;
+                            return sizeObj;
                         }),
                     };
                 }
                 return variant;
             });
-            transaction.update(inventoryRef, {variants: updatedVariants});
+            transaction.update(inventoryRef, { variants: updatedVariants });
 
-            // Delete matching cart items
+            // Delete matching cart item
             const cartQuery = await posCartCollection
                 .where("itemId", "==", item.itemId)
                 .where("variantId", "==", item.variantId)
@@ -321,8 +320,8 @@ export const removeFromPosCart = async (item: CartItem) => {
 
         console.log("Item successfully removed from POS cart and inventory updated.");
     } catch (error) {
-        console.error("Error removing item from POS cart:", error.message);
-        throw new Error(error.message);
+        console.error("Error removing item from POS cart:", error);
+        throw error; // re-throw so caller knows it failed
     }
 };
 
