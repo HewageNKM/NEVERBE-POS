@@ -7,7 +7,7 @@ import {Toaster} from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
     title: {
-        template: `%s | POS`,
+        template: `%s`,
         default: "POS",
     },
     description: "POS",

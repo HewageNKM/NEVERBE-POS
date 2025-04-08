@@ -49,7 +49,7 @@ const Products = () => {
             <div className="mt-5 flex flex-col justify-between">
                 {/* Display products */}
                 <div className="mb-10">
-                    <ul className="grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-5 md:gap-10">
+                    <ul className="grid lg:grid-cols-5 grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
                         {products.map((product: Item) => (
                             <li key={product.itemId} className="mb-4">
                                 <ItemCard item={product} onAdd={() => {
