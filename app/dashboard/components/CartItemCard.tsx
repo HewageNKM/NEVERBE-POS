@@ -49,8 +49,11 @@ const CartItemCard = ({
             </div>
             <div className="flex flex-col items-end">
                 <span className="text-lg font-medium">Qty: {quantity}</span>
-                <span className="text-lg font-medium">LKR {(price).toFixed(2)}</span>
-                <span className="text-sm text-gray-500">Total: LKR {(quantity * (price)).toFixed(2)}</span>
+                <div className="flex flex-row gap-1 items-center">
+                    <p className={`text-lg font-bold ${item.discount > 0 && "line-through"}`}>LKR {(price).toFixed(2)}</p>
+                    <p className="text-lg font-bold text-yellow-500">LKR {item.price - (item.discount / quantity)}</p>
+                </div>
+                <span className="text-sm text-gray-500">Total: LKR {(quantity * (price - item.discount)).toFixed(2)}</span>
                 <Button
                     variant={"outline"}
                     onClick={() => removeItemFromCart()}

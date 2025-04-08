@@ -64,31 +64,30 @@ const InvoiceDetails = () => {
     };
 
     return (
-        <div className="flex px-2 relative items-center w-full min-h-screen flex-col justify-between">
+        <div className="flex px-2 relative items-center w-full min-h-screen flex-col justify-evenly">
             <div className="flex flex-col w-full gap-5">
                 <div className="flex-row flex items-center justify-between w-full">
                     <Profile/>
                 </div>
             </div>
-
-            <div className="w-full flex flex-col">
-                <h1 className="text-2xl text-center font-bold mt-5">Invoice Details</h1>
-                <div className="flex mt-5 justify-between">
-                    <h2 className="text-lg font-bold">
-                        Invoice #: <span className="uppercase">{invoiceId}</span>
-                    </h2>
-                    <h2 className="text-lg font-bold">Invoices: {invoices}</h2>
+            <div className="w-full">
+                <div className="w-full flex flex-col">
+                    <h1 className="text-2xl text-center font-bold mt-5">Invoice Details</h1>
+                    <div className="flex mt-5 justify-between">
+                        <h2 className="text-lg font-bold">
+                            Invoice #: <span className="uppercase">{invoiceId}</span>
+                        </h2>
+                        <h2 className="text-lg font-bold">Invoices: {invoices}</h2>
+                    </div>
+                    <div className="border-t-2 w-full"/>
                 </div>
-                <div className="border-t-2 w-full"/>
+                <ScrollArea className="w-full flex flex-col gap-2 relative min-h-[50vh] overflow-y-auto">
+                    {items.map((item, index) => (
+                        <CartItemCard key={index} item={item}/>
+                    ))}
+                    {isInvoiceLoading && <LoadingScreen type={"component"}/>}
+                </ScrollArea>
             </div>
-
-            <ScrollArea className="w-full flex flex-col gap-2 relative min-h-[50vh] overflow-y-auto">
-                {items.map((item, index) => (
-                    <CartItemCard key={index} item={item}/>
-                ))}
-                {isInvoiceLoading && <LoadingScreen type={"component"}/>}
-            </ScrollArea>
-
             <div className="w-full flex flex-col px-2">
                 <div className="border-t-2 w-full"/>
                 <div className="flex flex-col gap-1 mt-5">

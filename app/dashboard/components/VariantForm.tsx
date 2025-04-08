@@ -26,9 +26,10 @@ const VariantForm = () => {
     const dispatch = useAppDispatch();
 
     const addToCart = async () => {
+        const totalDiscount = (discount + (selectedItem?.sellingPrice - (Math.round((selectedItem?.sellingPrice - (selectedItem?.discount * selectedItem?.sellingPrice / 100)) / 10) * 10))) * qty
         const newCartItem: CartItem = {
             bPrice: selectedItem?.buyingPrice,
-            discount: discount * qty,
+            discount: totalDiscount,
             itemId: selectedItem?.itemId || "",
             name: selectedItem?.name || "",
             price: selectedItem?.sellingPrice || 0,
