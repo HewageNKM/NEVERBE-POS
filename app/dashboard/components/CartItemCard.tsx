@@ -13,7 +13,7 @@ const CartItemCard = ({
                       }: {
     item: CartItem;
 }) => {
-    const {thumbnail, name, variantName, itemId, variantId, quantity, price, size, discount} = item;
+    const {thumbnail, name, variantName, itemId, variantId, quantity, price, size} = item;
     const dispatch = useAppDispatch();
     const {currentPage,currentSize} = useAppSelector(state => state.product);
 
@@ -40,7 +40,7 @@ const CartItemCard = ({
                     className="w-12 h-12 object-cover rounded"
                 />
                 <div>
-                    <p className="text-lg font-medium">{name}({discount}%OFF)</p>
+                    <p className="text-lg font-medium">{name}</p>
                     <p className="text-sm text-gray-500 capitalize">{variantName}/{size}</p>
                     <p className="text-sm text-gray-400 uppercase">
                         {itemId}/ {variantId}
