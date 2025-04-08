@@ -196,7 +196,7 @@ export const addItemToPosCart = async (item: CartItem) => {
                 throw new Error("Variant not found");
             }
 
-            const size = variant?.sizes.find(size => size.size === item.size);
+            const size = variant.sizes.find(size => size.size === item.size);
             if (!size) {
                 console.warn(`Size ${item.size} not found.`);
                 throw new Error("Size not found");
@@ -214,7 +214,7 @@ export const addItemToPosCart = async (item: CartItem) => {
                         ...variant,
                         sizes: variant.sizes.map(size => {
                             if (size.size === item.size) {
-                                return {...size, stock: size.stock - item.quantity};
+                                return { ...size, stock: size.stock - item.quantity };
                             }
                             return size;
                         }),
@@ -222,7 +222,7 @@ export const addItemToPosCart = async (item: CartItem) => {
                 }
                 return variant;
             });
-            transaction.update(inventoryRef, {variants: updatedVariants});
+            transaction.update(inventoryRef, { variants: updatedVariants });
 
             // Check for existing cart item
             const cartQuery = await posCartCollection
@@ -236,21 +236,24 @@ export const addItemToPosCart = async (item: CartItem) => {
                 // Update quantity of existing cart item
                 const cartDoc = cartQuery.docs[0];
                 const existingCartItem = cartDoc.data() as CartItem;
-                transaction.update(cartDoc.ref, {
-                    quantity: existingCartItem.quantity + item.quantity,
-                });
-                console.log(`Updated quantity for cart item. New Quantity: ${existingCartItem.quantity + item.quantity}`);
+                const newQuantity = existingCartItem.quantity + item.quantity;
+
+                transaction.update(cartDoc.ref, { quantity: newQuantity });
             } else {
-                // Add new cart item
-                transaction.create(posCartCollection.doc(), item);
-                console.log("New item added to POS cart:", item);
+                // Add new item to cart
+                const newCartItem = {
+                    ...item,
+                    createdAt: new Date(),
+                };
+                const newCartDocRef = posCartCollection.doc();
+                transaction.set(newCartDocRef, newCartItem);
             }
         });
 
-        console.log("Item successfully added to POS cart and inventory updated.");
+        console.log("Item successfully added to POS cart.");
     } catch (error) {
-        console.error("Error adding item to POS cart:", error.message);
-        throw new Error(error.message);
+        console.error("Failed to add item to POS cart:", error);
+        throw error;
     }
 };
 
