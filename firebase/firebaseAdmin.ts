@@ -233,11 +233,17 @@ export const addItemToPosCart = async (item: CartItem) => {
                 .get();
 
             if (!cartQuery.empty) {
-                // Update quantity of existing cart item
                 const cartDoc = cartQuery.docs[0];
                 const existingCartItem = cartDoc.data() as CartItem;
-                const newQuantity = existingCartItem.quantity + item.quantity;
 
+                // Check if discount > 0
+                if (existingCartItem.discount > 0) {
+                    console.warn("Item with discount already exists. Remove item and add again.");
+                    throw new Error("Can't add remove item and add again");
+                }
+
+                // Update quantity of existing cart item
+                const newQuantity = existingCartItem.quantity + item.quantity;
                 transaction.update(cartDoc.ref, { quantity: newQuantity });
             } else {
                 // Add new item to cart
