@@ -26,6 +26,15 @@ const VariantForm = () => {
     const dispatch = useAppDispatch();
 
     const addToCart = async () => {
+
+        if (qty > selectedVariant?.sizes.find(size => size.size === selectedSize)?.stock) {
+            dispatch(showAlert({
+                buttonTitle: "Okay",
+                title: "Not enough stock available",
+                showAlert: true
+            }))
+        }
+
         const totalDiscount = (discount + (selectedItem?.sellingPrice - (Math.round((selectedItem?.sellingPrice - (selectedItem?.discount * selectedItem?.sellingPrice / 100)) / 10) * 10))) * qty
         const newCartItem: CartItem = {
             bPrice: selectedItem?.buyingPrice,

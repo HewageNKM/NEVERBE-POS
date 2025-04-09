@@ -35,7 +35,7 @@ const Hero = () => {
             <header>
                 <form onSubmit={(evt) => onSearch(evt)}
                       className="flex-row flex w-[60vw] lg:w-[40vw] justify-center items-center gap-2">
-                    <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search"
+                    <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Name, Barcode, Manufacturer, and etc .............."
                            className="text-lg"/>
                     <Button type={"submit"} className="text-lg font-medium">Search</Button>
                 </form>
