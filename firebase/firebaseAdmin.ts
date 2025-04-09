@@ -204,7 +204,6 @@ export const addItemToPosCart = async (item: CartItem) => {
 
             if (size.stock < item.quantity) {
                 console.warn(`Insufficient stock. Requested: ${item.quantity}, Available: ${size.stock}`);
-                throw new Error("Insufficient stock");
             }
 
             // Deduct stock
