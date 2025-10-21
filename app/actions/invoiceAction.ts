@@ -46,7 +46,6 @@ export const getPosCart = async () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(res.data);
         return res.data;
     } catch (e) {
         throw e;
@@ -81,23 +80,6 @@ export const getAOrder = async (orderId: string) => {
             }
         });
         return res.data as Order;
-    } catch (e) {
-        throw e;
-    }
-}
-
-export const sendPrintInvoice = async (order: Order) => {
-    console.log(order);
-    try {
-        const res = await axios({
-            method: 'POST',
-            url: `http://localhost:4444/api/v1/printer/print`,
-            headers:{
-                "Content-Type": "application/json"
-            },
-            data: JSON.stringify(order),
-        });
-        return res.data;
     } catch (e) {
         throw e;
     }

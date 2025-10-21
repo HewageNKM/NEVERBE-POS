@@ -18,7 +18,7 @@ const Barcode = ({ value }:{value:string}) => {
         }
     }, [value]);
 
-    return <svg ref={svgRef}></svg>;
+    return <svg className='scale-50' ref={svgRef}></svg>;
 };
 
 export default Barcode;

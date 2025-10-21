@@ -1,30 +1,57 @@
-import React from 'react';
-import {Card, CardContent} from "@/components/ui/card";
-import {Variant} from "@/interfaces";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Variant } from "@/interfaces";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
-const VariantDisplayCard = ({variant, onClick}:{variant:Variant, onClick:(variant:Variant)=>void}) => {
-    return (
-        <Card
-            className="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-            onClick={() => onClick(variant)}
-        >
-            <CardContent className="p-2">
-                <div className="flex items-center space-x-4">
-                    <Image
-                        width={64}
-                        height={64}
-                        src={variant.images[0].url}
-                        alt={variant.variantName}
-                        className="w-16 h-16 rounded-md object-cover"
-                    />
-                    <div className="flex-1">
-                        <h4 className="font-medium capitalize text-lg">{variant.variantName}</h4>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
+const VariantDisplayCard = ({
+  variant,
+  onClick,
+}: {
+  variant: Variant;
+  onClick: (variant: Variant) => void;
+}) => {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 200, damping: 12 }}
+      onClick={() => onClick(variant)}
+      className="cursor-pointer"
+    >
+      <Card className="group overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-500/60 dark:hover:border-blue-400/60 transition-colors duration-300 rounded-xl shadow-sm hover:shadow-md bg-white dark:bg-gray-900">
+        <CardContent className="flex items-center gap-4 p-3 sm:p-4">
+          {/* Variant Image */}
+          <div className="relative">
+            <Image
+              width={72}
+              height={72}
+              src={variant.images?.[0]?.url || "/placeholder.png"}
+              alt={variant.variantName}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-gray-100 dark:border-gray-800"
+            />
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+
+          {/* Variant Info */}
+          <div className="flex-1 min-w-0">
+            <h4 className="text-base sm:text-lg font-semibold capitalize truncate text-gray-800 dark:text-gray-100">
+              {variant.variantName}
+            </h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {variant.sizes?.length || 0} sizes available
+            </p>
+          </div>
+
+          {/* Action Indicator */}
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+              Select →
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
 };
 
 export default VariantDisplayCard;

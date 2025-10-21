@@ -29,6 +29,7 @@ export interface PaymentMethod {
 export interface Payment {
     id: string;
     amount: number;
+    paymentMethodId:string,
     cardNumber:string,
     paymentMethod: string;
 }
@@ -80,7 +81,9 @@ export interface Order {
     items: OrderItem[],
     paymentStatus: string,
     paymentMethod: string,
+    paymentMethodId?:string,
     discount: number,
+    status:string,
     fee: number,
     paymentReceived?:Payment[]
     from: string,

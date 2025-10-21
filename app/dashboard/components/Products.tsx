@@ -1,119 +1,130 @@
-"use client"
+"use client";
+
+import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious
-} from '@/components/ui/pagination';
-import React, {useEffect} from 'react';
-import {Item} from "@/interfaces";
-import ItemCard from "@/app/dashboard/components/ItemCard";
-import LoadingScreen from '@/components/LoadingScreen';
+  getProducts,
+  setCurrentPage,
+  setIsVariantsFormOpen,
+  setSelectedItem,
+} from "@/lib/prodcutSlice/productSlice";
+import LoadingScreen from "@/components/LoadingScreen";
 import VariantForm from "@/app/dashboard/components/VariantForm";
-import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getProducts, setCurrentPage, setIsVariantsFormOpen, setSelectedItem} from "@/lib/prodcutSlice/productSlice";
 import Alert from "@/components/Alert";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import ProductRow from "./ProductRow";
+import { motion } from "framer-motion";
 
 const Products = () => {
-    const {currentPage, isVariantsFormOpen, products, isLoading, currentSize} = useAppSelector(state => state.product);
-    const {showAlert} = useAppSelector(state => state.alert);
-    const {user} = useAppSelector(state => state.auth);
-    const dispatch = useAppDispatch();
+  const { currentPage, isVariantsFormOpen, products, isLoading, currentSize } =
+    useAppSelector((state) => state.product);
+  const { showAlert } = useAppSelector((state) => state.alert);
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
 
-    useEffect(() => {
-        if (user) {
-            fetchData();
-        }
-    }, [currentPage, user]);
+  // Fetch products on mount or page change
+  useEffect(() => {
+    if (user) dispatch(getProducts({ page: currentPage, size: currentSize }));
+  }, [currentPage, user, dispatch]);
 
-    const fetchData = async () => {
-        try {
-            dispatch(getProducts({page: currentPage, size: currentSize}));
-        } catch (error) {
-            console.error(error);
-        }
-    }
-    // Handlers for pagination
-    const handlePageChange = (page: number) => {
-        if (page >= 1) {
-            dispatch(setCurrentPage(page));
-        }
-    };
-    return (
-        <div
-            className="rounded-lg p-4 mt-10 bg-background shadow relative lg:min-h-[80vh] md:min-h-[60vh] min-h-screen">
-            <h1 className="lg:text-xl text-lg font-bold tracking-wide">Products</h1>
-            <div className="mt-5 flex flex-col justify-between">
-                {/* Display products */}
-                <div className="mb-10">
-                    <ul className="grid lg:grid-cols-5 grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
-                        {products.map((product: Item) => (
-                            <li key={product.itemId} className="mb-4">
-                                <ItemCard item={product} onAdd={() => {
-                                    dispatch(setSelectedItem(product));
-                                    dispatch(setIsVariantsFormOpen(true))
-                                }}/>
-                            </li>
-                        ))}
-                    </ul>
-                    {products.length === 0 && (
-                        <p className="text-center text-lg text-gray-500 mt-5">No products to display</p>
-                    )}
-                </div>
-            </div>
+  const handlePageChange = (page: number) => {
+    if (page >= 1) dispatch(setCurrentPage(page));
+  };
 
-            {/* Pagination controls */}
-            <div className="flex absolute bottom-3 w-full justify-center items-center">
-                <Pagination>
-                    <PaginationContent className="flex-box flex-row flex-wrap">
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handlePageChange(currentPage - 1);
-                                }}
-                            />
-                        </PaginationItem>
-                        {[...Array(5)].map((_, index) => (
-                            <PaginationItem key={index}>
-                                <PaginationLink
-                                    href="#"
-                                    isActive={index + 1 === currentPage}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        handlePageChange(index + 1);
-                                    }}
-                                >
-                                    {index + 1}
-                                </PaginationLink>
-                            </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                            <PaginationEllipsis/>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handlePageChange(currentPage + 1);
-                                }}
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
-            </div>
-            {isLoading && (<LoadingScreen type={"component"}/>)}
-            {isVariantsFormOpen && (
-                <VariantForm/>
-            )}
-            {showAlert && (<Alert/>)}
-        </div>
-    );
+  const handleSelect = (product: any) => {
+    dispatch(setSelectedItem(product));
+    dispatch(setIsVariantsFormOpen(true));
+  };
+
+  return (
+    <div className="relative rounded-xl bg-background p-3 shadow-sm mt-2 flex flex-col min-h-[80vh] transition-colors duration-300">
+      <div className="flex justify-between items-center mb-5">
+        <h1 className="text-xl lg:text-2xl font-bold tracking-wide">
+          Products
+        </h1>
+      </div>
+
+      {isLoading && <LoadingScreen type="component" />}
+      {/* Product List */}
+      <div className="flex-1 overflow-y-auto p-2 max-h-[60vh] scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700">
+        {products.length === 0 && !isLoading ? (
+          <p className="text-center text-lg text-gray-500 mt-5">
+            No products to display
+          </p>
+        ) : (
+          <motion.div
+            layout
+            className="flex flex-col gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            {products.map((product) => (
+              <motion.div
+                key={product.itemId}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ProductRow product={product} onSelect={handleSelect} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-6">
+        <Pagination>
+          <PaginationContent className="flex flex-wrap gap-1">
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageChange(currentPage - 1);
+                }}
+              />
+            </PaginationItem>
+            {[...Array(5)].map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  href="#"
+                  isActive={index + 1 === currentPage}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(index + 1);
+                  }}
+                >
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageChange(currentPage + 1);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+
+      {/* Dialogs */}
+      {isVariantsFormOpen && <VariantForm />}
+      {showAlert && <Alert />}
+    </div>
+  );
 };
 
 export default Products;
