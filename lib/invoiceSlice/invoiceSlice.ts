@@ -21,10 +21,11 @@ const initialState: InvoiceSlice = {
   items: [],
 };
 
-const generateInvoiceId = (nodeId: string = "P") => {
-  const timePart = Date.now().toString(36).toUpperCase().padStart(7, "0");
-  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `ORD-${timePart}${nodeId}${randomPart}`;
+const generateInvoiceId = () => {
+    const now = new Date();
+  const datePart = now.toISOString().slice(2, 10).replace(/-/g, "");
+  const randPart = Math.floor(100000 + Math.random() * 900000);
+  return `${datePart}${randPart}`;
 };
 
 export const invoiceSlice = createSlice({
