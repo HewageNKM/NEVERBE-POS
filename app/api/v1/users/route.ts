@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import {authenticateUserPassword} from "@/firebase/firebaseAdmin";
+import { authenticateUserPassword } from "@/services/AuthService";
 
 export const POST = async (req: NextRequest) => {
     try {

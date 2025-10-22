@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import {addItemToPosCart, getPosCart, removeFromPosCart} from "@/firebase/firebaseAdmin";
 import {CartItem} from "@/interfaces";
+import { addItemToPosCart, getPosCart, removeFromPosCart } from "@/services/CartService";
 
 export const POST = async (req: NextRequest) => {
     try {

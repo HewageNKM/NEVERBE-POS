@@ -1,4 +1,5 @@
-import {getUserById, verifyIdToken} from "@/firebase/firebaseAdmin";
+import { verifyIdToken } from "@/services/AuthService";
+import { getUserById } from "@/services/UserSerivce";
 import {NextRequest} from "next/server";
 
 export const authorizeRequest = async (req: NextRequest) => {

@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import {getAllPaymentMethods} from "@/firebase/firebaseAdmin";
+import { getAllPaymentMethods } from "@/services/OtherService";
 
 export const GET = async (req: NextRequest) => {
     try {

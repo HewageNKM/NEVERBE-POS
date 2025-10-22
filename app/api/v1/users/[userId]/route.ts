@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeRequest } from "@/lib/midlleware";
-import {authenticateUserPassword, getUserById} from "@/firebase/firebaseAdmin";
+import { getUserById } from "@/services/UserSerivce";
 
 export const GET = async (req: NextRequest) => {
     try {

@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import {addNewOrder} from "@/firebase/firebaseAdmin";
+import { addNewOrder } from "@/services/StockService";
 
 export const POST = async (req: NextRequest) => {
     try {

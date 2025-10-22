@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import {getAItem} from "@/firebase/firebaseAdmin";
+import { getAItem } from "@/services/ProductsService";
 
 export const GET = async (req: NextRequest) => {
     try {
