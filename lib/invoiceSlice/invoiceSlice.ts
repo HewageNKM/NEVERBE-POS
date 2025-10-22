@@ -22,7 +22,7 @@ const initialState: InvoiceSlice = {
 };
 
 const generateInvoiceId = () => {
-    const now = new Date();
+  const now = new Date();
   const datePart = now.toISOString().slice(2, 10).replace(/-/g, "");
   const randPart = Math.floor(100000 + Math.random() * 900000);
   return `${datePart}${randPart}`;

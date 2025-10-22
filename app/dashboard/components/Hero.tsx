@@ -3,14 +3,12 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import DarkModeSelector from "@/components/DarkModeSelector";
-import InvoicesForm from "@/app/dashboard/components/InvoicesForm";
 import { useAppDispatch } from "@/lib/hooks";
 import { setIsLoading, setProducts } from "@/lib/prodcutSlice/productSlice";
 import { algoliasearch } from "algoliasearch";
 import { Item } from "@/interfaces";
 
 const Hero = () => {
-  const [showInvoicesForm, setShowInvoicesForm] = useState(false);
   const [query, setQuery] = useState("");
   const dispatch = useAppDispatch();
   const client = algoliasearch(
@@ -25,7 +23,9 @@ const Hero = () => {
       const results = await client.search({
         requests: [{ indexName: "inventory_index", query }],
       });
-      const filterInactives = results.results[0].hits.filter((item: Item) => item.status === "Active");
+      const filterInactives = results.results[0].hits.filter(
+        (item: Item) => item.status === "Active"
+      );
       dispatch(setProducts(filterInactives));
       setQuery("");
     } catch (e) {
@@ -50,16 +50,12 @@ const Hero = () => {
         </Button>
       </form>
 
-      {/* Actions */}
       <div className="flex flex-row gap-3 mt-2 md:mt-0">
-        <Button onClick={() => setShowInvoicesForm(true)} variant="secondary">
+        {/* <Button onClick={() => setShowInvoicesForm(true)} variant="secondary">
           Invoices
-        </Button>
+        </Button> */}
         <DarkModeSelector />
       </div>
-
-      {/* Invoices Form Modal */}
-      <InvoicesForm showInvoicesForm={showInvoicesForm} setShowInvoicesForm={setShowInvoicesForm} />
     </div>
   );
 };
