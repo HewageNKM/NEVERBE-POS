@@ -11,7 +11,13 @@ import {
   getPosCartItems,
   setShowPaymentDialog,
 } from "@/lib/invoiceSlice/invoiceSlice";
-import { collection, onSnapshot, query, Timestamp, where } from "@firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  Timestamp,
+  where,
+} from "@firebase/firestore";
 import { db } from "@/firebase/firebaseClient";
 
 const InvoiceDetails = () => {
@@ -21,7 +27,6 @@ const InvoiceDetails = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [invoices, setInvoices] = useState(0);
 
-  // Totals
   const total =
     items?.reduce((acc, item) => acc + item.quantity * item.price, 0) || 0;
   const discount = items?.reduce((acc, item) => acc + item.discount, 0) || 0;
@@ -36,8 +41,12 @@ const InvoiceDetails = () => {
 
   const fetchTodayOrders = async () => {
     try {
-      const startOfDay = Timestamp.fromDate(new Date(new Date().setHours(0, 0, 0)));
-      const endOfDay = Timestamp.fromDate(new Date(new Date().setHours(23, 59, 59)));
+      const startOfDay = Timestamp.fromDate(
+        new Date(new Date().setHours(0, 0, 0))
+      );
+      const endOfDay = Timestamp.fromDate(
+        new Date(new Date().setHours(23, 59, 59))
+      );
       const ordersQuery = query(
         collection(db, "orders"),
         where("createdAt", ">=", startOfDay),
@@ -52,61 +61,61 @@ const InvoiceDetails = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen p-4 gap-4 bg-background">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center w-full mb-4 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4 w-full bg-card dark:bg-zinc-900 rounded-xl shadow-lg p-5 border border-border">
         <Profile />
         <div className="w-full flex flex-col">
           <h1 className="text-2xl font-bold">Invoice Details</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Invoice #:{" "}
-            <span className="uppercase font-medium">{invoiceId}</span>
+            <span className="uppercase font-medium tracking-wide">
+              {invoiceId || "N/A"}
+            </span>
           </p>
-          <p className="text-sm text-gray-500">
-            Today&apos;s Invoices: {invoices}
+          <p className="text-sm text-muted-foreground">
+            Today&apos;s Invoices:{" "}
+            <span className="font-semibold">{invoices}</span>
           </p>
         </div>
       </div>
 
       {/* Main content: Summary + Cart Items */}
       <div className="flex flex-col gap-4 flex-1">
-        {/* Summary on top */}
-        <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-4 flex flex-col justify-between">
+        {/* Summary */}
+        <div className="w-full bg-card dark:bg-zinc-900 rounded-xl shadow-lg p-5 border border-border">
           <h2 className="text-lg font-semibold mb-3">Summary</h2>
-          <div className="flex flex-col gap-2 mb-4">
+          <div className="flex flex-col gap-2 mb-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500 font-medium">Subtotal</span>
-              <span className="text-blue-700 font-medium">
-                LKR {total.toFixed(2)}
-              </span>
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-medium">LKR {total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500 font-medium">Discount</span>
-              <span className="text-blue-700 font-medium">
-                LKR {discount.toFixed(2)}
-              </span>
+              <span className="text-muted-foreground">Discount</span>
+              <span className="font-medium">LKR {discount.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between border-t pt-2 font-bold text-lg">
+            <div className="flex justify-between border-t pt-2 text-base font-semibold">
               <span>Total</span>
               <span>LKR {subtotal.toFixed(2)}</span>
             </div>
           </div>
           <Button
             size="lg"
+            variant="outline"
             onClick={() => dispatch(setShowPaymentDialog(true))}
             disabled={items.length === 0}
-            className="w-full disabled:cursor-not-allowed disabled:bg-opacity-60"
+            className="w-full mt-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
           >
             Place Order
           </Button>
         </div>
 
-        {/* Cart Items Scrollable */}
-        <div className="flex-1 bg-white max-h-[60vh] dark:bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
+        {/* Cart Items */}
+        <div className="flex-1 bg-card dark:bg-zinc-900 rounded-xl shadow-lg p-5 border border-border flex flex-col">
           <h2 className="text-lg font-semibold mb-3">Cart Items</h2>
-          <ScrollArea className="flex-1 overflow-y-auto">
+          <ScrollArea className="flex flex-col overflow-auto max-h-[50vh] scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700">
             {items.length === 0 && !isInvoiceLoading && (
-              <p className="text-center text-gray-500 mt-4">
+              <p className="text-center text-muted-foreground mt-6">
                 No items in the cart
               </p>
             )}
@@ -118,6 +127,7 @@ const InvoiceDetails = () => {
         </div>
       </div>
 
+      {/* Payment Dialog */}
       {showPaymentDialog && <PaymentForm />}
     </div>
   );

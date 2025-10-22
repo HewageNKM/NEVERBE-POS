@@ -31,6 +31,7 @@ import {
   setSelectedItem,
 } from "@/lib/prodcutSlice/productSlice";
 import { showAlert } from "@/lib/alertSlice/alertSlice";
+import { motion, AnimatePresence } from "framer-motion";
 
 const VariantForm = () => {
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
@@ -107,104 +108,165 @@ const VariantForm = () => {
 
   return (
     <Dialog open={isVariantsFormOpen} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-md bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 p-6 rounded-xl shadow-xl">
+      <DialogContent
+        className="
+          sm:max-w-md 
+          bg-white dark:bg-black 
+          text-black dark:text-gray-100
+          border border-gray-200 dark:border-neutral-800
+          rounded-xl shadow-xl
+          transition-colors duration-300
+          p-6 overflow-hidden
+        "
+      >
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {selectedVariant ? "Select Size & Quantity" : "Choose a Variant"}
-          </DialogTitle>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {selectedVariant ? "Select Size & Quantity" : "Choose a Variant"}
+            </DialogTitle>
+          </motion.div>
         </DialogHeader>
 
-        {/* STEP 1: VARIANT SELECTION */}
-        {!selectedVariant && (
-          <ScrollArea className="h-72 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 p-3">
-            <div className="space-y-3 p-2">
-              {selectedItem?.variants?.map((variant) => (
-                <VariantDisplayCard
-                  key={variant.variantId}
-                  variant={variant}
-                  onClick={() => setSelectedVariant(variant)}
-                />
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-
-        {/* STEP 2: SIZE + DETAILS */}
-        {selectedVariant && (
-          <div className="space-y-5 mt-3">
-            <div className="flex flex-col gap-2">
-              <Label className="font-medium">Select Size</Label>
-              <Select
-                onValueChange={(value) => setSelectedSize(value)}
-                value={selectedSize}
-              >
-                <SelectTrigger className="w-full border-gray-300 dark:border-gray-700">
-                  <SelectValue placeholder="Choose a size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedVariant.sizes.map((size) => (
-                    <SelectItem key={size.size} value={size.size}>
-                      {size.size} — {size.stock} in stock
-                    </SelectItem>
+        <AnimatePresence mode="wait">
+          {/* STEP 1: VARIANT SELECTION */}
+          {!selectedVariant && (
+            <motion.div
+              key="variants-step"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <ScrollArea className="h-72 w-full rounded-md border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 p-3 transition-colors duration-300">
+                <div className="space-y-3 p-2">
+                  {selectedItem?.variants?.map((variant) => (
+                    <VariantDisplayCard
+                      key={variant.variantId}
+                      variant={variant}
+                      onClick={() => setSelectedVariant(variant)}
+                    />
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
+                </div>
+              </ScrollArea>
+            </motion.div>
+          )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="font-medium">Quantity</Label>
-                <Input
-                  className="mt-1"
-                  type="number"
-                  min="1"
-                  value={qty}
-                  onChange={(e) => setQty(parseInt(e.target.value))}
-                />
+          {/* STEP 2: SIZE + DETAILS */}
+          {selectedVariant && (
+            <motion.div
+              key="size-step"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="space-y-5 mt-3"
+            >
+              <div className="flex flex-col gap-2">
+                <Label className="font-medium text-gray-800 dark:text-gray-200">
+                  Select Size
+                </Label>
+                <Select
+                  onValueChange={(value) => setSelectedSize(value)}
+                  value={selectedSize}
+                >
+                  <SelectTrigger className="w-full border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100">
+                    <SelectValue placeholder="Choose a size" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-neutral-800">
+                    {selectedVariant.sizes.map((size) => (
+                      <SelectItem key={size.size} value={size.size}>
+                        {size.size} — {size.stock} in stock
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <Label className="font-medium">Discount</Label>
-                <Input
-                  className="mt-1"
-                  type="number"
-                  value={discount.toString()}
-                  onChange={(e) =>
-                    setDiscount(Number.parseInt(e.target.value) || 0)
+
+              <div className="grid grid-cols-2 gap-4">
+                <motion.div whileHover={{ scale: 1.02 }}>
+                  <Label className="font-medium text-gray-800 dark:text-gray-200">
+                    Quantity
+                  </Label>
+                  <Input
+                    className="mt-1 bg-white dark:bg-neutral-900 border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100"
+                    type="number"
+                    min="1"
+                    value={qty}
+                    onChange={(e) => setQty(parseInt(e.target.value))}
+                  />
+                </motion.div>
+
+                <motion.div whileHover={{ scale: 1.02 }}>
+                  <Label className="font-medium text-gray-800 dark:text-gray-200">
+                    Discount
+                  </Label>
+                  <Input
+                    className="mt-1 bg-white dark:bg-neutral-900 border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100"
+                    type="number"
+                    value={discount.toString()}
+                    onChange={(e) =>
+                      setDiscount(Number.parseInt(e.target.value) || 0)
+                    }
+                  />
+                </motion.div>
+              </div>
+
+              {selectedSize && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xs text-right text-gray-500 dark:text-gray-400"
+                >
+                  Available Stock:{" "}
+                  {
+                    selectedVariant.sizes.find((s) => s.size === selectedSize)
+                      ?.stock
                   }
-                />
-              </div>
-            </div>
-
-            {selectedSize && (
-              <p className="text-xs text-right text-gray-500 dark:text-gray-400">
-                Available Stock:{" "}
-                {
-                  selectedVariant.sizes.find((s) => s.size === selectedSize)
-                    ?.stock
-                }
-              </p>
-            )}
-          </div>
-        )}
+                </motion.p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* FOOTER */}
         <DialogFooter className="flex justify-between mt-6">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onCancel}
-            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-          >
-            Cancel
-          </Button>
-          <Button
-            className="px-6 disabled:opacity-60"
-            type="button"
-            disabled={!selectedVariant || !selectedSize || qty < 1}
-            onClick={addToCart}
-          >
-            Add to Cart
-          </Button>
+          <motion.div whileTap={{ scale: 0.97 }}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onCancel}
+              className="
+                bg-gray-100 hover:bg-gray-200 
+                dark:bg-neutral-800 dark:hover:bg-neutral-700 
+                text-gray-900 dark:text-gray-100 
+                border border-gray-300 dark:border-neutral-700
+                transition-colors
+              "
+            >
+              Cancel
+            </Button>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.97 }}>
+            <Button
+              className="
+                px-6
+                bg-black text-white hover:bg-gray-800
+                dark:bg-white dark:text-black dark:hover:bg-gray-200
+                border border-transparent dark:border-gray-200
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition-colors
+              "
+              type="button"
+              disabled={!selectedVariant || !selectedSize || qty < 1}
+              onClick={addToCart}
+            >
+              Add to Cart
+            </Button>
+          </motion.div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -36,7 +36,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 bg-white dark:bg-[#0C090A] rounded-lg shadow-md">
+    <div className="w-full bg-card dark:bg-zinc-900 rounded-xl shadow-lg p-5 border border-border  flex flex-col md:flex-row justify-between items-center gap-4 bg-white">
       {/* Search Form */}
       <form onSubmit={onSearch} className="flex w-full md:w-[60%] gap-2">
         <Input

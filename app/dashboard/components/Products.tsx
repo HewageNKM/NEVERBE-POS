@@ -44,7 +44,7 @@ const Products = () => {
   };
 
   return (
-    <div className="relative rounded-xl bg-background p-3 shadow-sm mt-2 flex flex-col min-h-[80vh] transition-colors duration-300">
+    <div className="relative w-full bg-card dark:bg-zinc-900 rounded-xl shadow-lg p-5 border border-border mt-2 flex flex-col max-h-[80vh] transition-colors duration-300">
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl lg:text-2xl font-bold tracking-wide">
           Products
@@ -53,7 +53,7 @@ const Products = () => {
 
       {isLoading && <LoadingScreen type="component" />}
       {/* Product List */}
-      <div className="flex-1 overflow-y-auto p-2 max-h-[60vh] scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700 p-2 max-h-[60vh] scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700">
         {products.length === 0 && !isLoading ? (
           <p className="text-center text-lg text-gray-500 mt-5">
             No products to display

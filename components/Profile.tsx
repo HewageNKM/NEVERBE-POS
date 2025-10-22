@@ -37,7 +37,7 @@ const Profile = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto rounded-xl overflow-hidden">
+    <Card className="w-full">
       <CardContent className="flex flex-col items-center justify-between gap-4 p-4">
         {/* User Info */}
         <div className="flex items-center gap-4">
