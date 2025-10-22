@@ -2,8 +2,6 @@
 
 import React, { forwardRef } from "react";
 import { Order } from "@/interfaces";
-import Image from "next/image";
-import { Logo } from "@/assets/images";
 import Barcode from "@/components/Barcode";
 
 interface InvoiceProps {
@@ -15,12 +13,16 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ order }, ref) => {
   const totalDiscount = order.items.reduce((acc, i) => acc + i.discount, 0);
   const grandTotal = total - totalDiscount;
 
+  const totalPaid =
+    order.paymentReceived?.reduce((acc, p) => acc + p.amount, 0) || 0;
+  const change = totalPaid - grandTotal;
+
   return (
     <div
       ref={ref}
-      className="w-[54mm] text-xs font-mono mx-auto p-2 text-center text-black"
+      className="w-[58mm] text-xs font-mono mx-auto p-1 text-center text-black"
     >
-      {/* ===== Header Section ===== */}
+      {/* ===== Header ===== */}
       <div className="flex flex-col items-center mb-2">
         <h2 className="text-base font-bold tracking-wide">NEVERBE</h2>
         <p className="text-[10px] leading-tight">
@@ -28,37 +30,37 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ order }, ref) => {
         </p>
         <p className="text-[10px] leading-tight">📞 +94 70 520 8999</p>
         <p className="text-[10px] leading-tight">📞 +94 72 924 9999</p>
-        <p className="text-[10px] leading-tight">✉️ info@neverbe.lk</p>
+        <p className="text-[10px] leading-tight">🖂 info@neverbe.lk</p>
       </div>
 
-      <hr className="border-dashed border-gray-400 my-1" />
+      <hr className="border-dashed border-black my-1" />
 
       <p className="text-[10px] mb-2 text-center">
         <strong>Order ID:</strong> {order.orderId.toUpperCase()}
       </p>
 
       {/* ===== Items Table ===== */}
-      <table className="w-full text-left text-[11px]">
+      <table className="w-full text-left text-[10px]">
         <thead>
-          <tr className="border-b border-gray-300">
-            <th className="text-left">Item</th>
-            <th className="text-right">Qty</th>
-            <th className="text-right">Price</th>
+          <tr className="border-b border-black">
+            <th className="text-left font-semibold">Item</th>
+            <th className="text-right font-semibold">Qty</th>
+            <th className="text-right font-semibold">Price</th>
           </tr>
         </thead>
         <tbody>
           {order.items.map((item) => (
             <tr key={item.itemId}>
-              <td>
+              <td className="align-top">
                 {item.name}
                 {item.variantName && (
-                  <span className="block text-[6px] capitalize text-gray-600">
+                  <span className="block text-[9px] capitalize">
                     {item.variantName}({item.size})
                   </span>
                 )}
               </td>
-              <td className="text-right">{item.quantity}</td>
-              <td className="text-right">
+              <td className="text-right align-top">{item.quantity}</td>
+              <td className="text-right align-top">
                 {(item.price * item.quantity).toFixed(2)}
               </td>
             </tr>
@@ -66,20 +68,22 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ order }, ref) => {
         </tbody>
       </table>
 
-      <hr className="border-dashed border-gray-400 my-2" />
+      <hr className="border-dashed border-black my-2" />
 
-      {/* ===== Totals Section ===== */}
-      <div className="text-right text-[11px] space-y-1">
+      {/* ===== Totals ===== */}
+      <div className="text-right text-[10px] space-y-0.5">
         <p>Subtotal: {total.toFixed(2)}</p>
         <p>Discount: -{totalDiscount.toFixed(2)}</p>
-        <p className="font-bold text-black">Total: {grandTotal.toFixed(2)}</p>
+        <p className="font-bold text-black text-[11px]">
+          Total: {grandTotal.toFixed(2)}
+        </p>
       </div>
 
-      <hr className="border-dashed border-gray-400 my-2" />
+      <hr className="border-dashed border-black my-2" />
 
-      {/* ===== Payments Section ===== */}
+      {/* ===== Payments ===== */}
       {order.paymentReceived && order.paymentReceived.length > 0 && (
-        <div className="text-left text-[11px] mb-2">
+        <div className="text-left text-[10px] mb-2 space-y-0.5">
           <p className="font-semibold mb-1">Payments:</p>
           {order.paymentReceived.map((p, idx) => (
             <div key={p.id} className="flex justify-between">
@@ -95,17 +99,34 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ order }, ref) => {
         </div>
       )}
 
-      <hr className="border-dashed border-gray-400 my-2" />
+      {/* ===== Total Paid & Change ===== */}
+      {totalPaid > 0 && (
+        <div className="text-right text-[10px] space-y-0.5">
+          <p>Total Paid: {totalPaid.toFixed(2)}</p>
+          {change > 0.01 && (
+            <p className="font-bold text-black text-[11px]">
+              Change: {change.toFixed(2)}
+            </p>
+          )}
+        </div>
+      )}
 
-      {/* ===== Footer Section ===== */}
-      <div className="text-center mt-2">
+      <hr className="border-dashed border-black my-2" />
+
+      {/* ===== Footer ===== */}
+      <div className="text-center mt-2 flex flex-col items-center">
         <p className="text-[10px]">
           {new Date(order.createdAt || "").toLocaleString()}
         </p>
         <p className="text-[11px] font-semibold mt-1">
           Thank You for Shopping!
         </p>
-        <p className="text-[10px]">No futher service without receipt!</p>
+        <p className="text-[10px]">No further service without receipt!</p>
+
+        {/* Barcode */}
+        <div className="mt-2">
+          <Barcode value={order.orderId.toUpperCase()} />
+        </div>
       </div>
     </div>
   );
