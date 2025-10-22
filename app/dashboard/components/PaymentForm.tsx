@@ -163,7 +163,7 @@ const PaymentForm = () => {
         paymentReceived: payments,
         createdAt: new Date().toISOString(),
         from: "Store",
-        status: "Processing",
+        status: "Completed",
         paymentStatus: "Paid",
         paymentMethod:
           payments.length > 1
