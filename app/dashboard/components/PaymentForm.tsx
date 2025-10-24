@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -39,24 +39,22 @@ import {
   setShowPaymentDialog,
 } from "@/lib/invoiceSlice/invoiceSlice";
 import { getProducts } from "@/lib/prodcutSlice/productSlice";
-import { addOrder, getAOrder } from "@/app/actions/invoiceAction";
+import { addOrder } from "@/app/actions/invoiceAction";
 import { getPOSPaymentMethods } from "@/app/actions/paymentsAction";
 import { useToast } from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
-import { useReactToPrint } from "react-to-print";
 import { Order, OrderItem, Payment, PaymentMethod } from "@/interfaces";
-import Invoice from "./Invoice";
+import { pdf } from "@react-pdf/renderer";
+import InvoicePDF from "./InvoicePDF";
 
 const PaymentForm = () => {
   const dispatch = useAppDispatch();
-  const invoiceRef = useRef<HTMLDivElement>(null);
   const { items, invoiceId, showPaymentDialog } = useAppSelector(
     (state) => state.invoice
   );
   const { currentSize, currentPage } = useAppSelector((state) => state.product);
   const { toast } = useToast();
 
-  // State
   const [payments, setPayments] = useState<Payment[]>([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cash");
   const [paymentAmount, setPaymentAmount] = useState("");
@@ -82,7 +80,7 @@ const PaymentForm = () => {
     [itemsTotal, totalDiscount]
   );
 
-  /** ---------- Logic ---------- **/
+  /** ---------- Add Payment ---------- **/
   const addPayment = () => {
     const amount = parseFloat(paymentAmount);
     const dueAmount = subtotal - paymentsTotal;
@@ -135,11 +133,24 @@ const PaymentForm = () => {
     setCardNumber(null);
   };
 
-  const handlePrint = useReactToPrint({
-    contentRef: invoiceRef,
-    documentTitle: `Invoice-${invoiceId}`,
-  });
+  /** ---------- Generate & Auto-Print PDF ---------- **/
+  const generatePDF = async (order: Order) => {
+    const blob = await pdf(<InvoicePDF order={order} />).toBlob();
+    const url = URL.createObjectURL(blob);
 
+    // Open the PDF in a new tab and trigger the print dialog
+    const printWindow = window.open(url);
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    } else {
+      console.error("Unable to open print window. Popups may be blocked.");
+    }
+  };
+
+  /** ---------- Place Order ---------- **/
   const placeOrder = async () => {
     setLoading(true);
     try {
@@ -155,10 +166,10 @@ const PaymentForm = () => {
         discount: i.discount,
       }));
 
-      let newOrder: Order = {
+      const newOrder: Order = {
         orderId: (invoiceId || "").toLowerCase(),
         items: orderItems,
-        fee: 0, // No fee charged
+        fee: 0,
         discount: totalDiscount,
         paymentReceived: payments,
         createdAt: new Date().toISOString(),
@@ -175,24 +186,27 @@ const PaymentForm = () => {
       };
 
       await addOrder(newOrder);
-      handlePrint();
-      dispatch(setShowPaymentDialog(false))
+      await generatePDF(newOrder);
+
+      // Reset state
       dispatch(getProducts({ page: currentPage, size: currentSize }));
-      toast({ title: "Order Placed", description: "Invoice printed." });
+      toast({ title: "Order Placed", description: "Invoice generated." });
     } catch (e: any) {
       toast({
-        title: "Print Error",
-        description: `Could not print receipt. ${e.message}`,
+        title: "Error",
+        description: `Could not generate receipt. ${e.message}`,
         variant: "destructive",
       });
     } finally {
       window.localStorage.removeItem("posInvoiceId");
       dispatch(getPosCartItems());
       dispatch(initializeInvoicedId());
+      dispatch(setShowPaymentDialog(false));
       setLoading(false);
     }
   };
 
+  /** ---------- Fetch Payment Methods ---------- **/
   const fetchPaymentMethods = async () => {
     try {
       const methods = await getPOSPaymentMethods();
@@ -362,7 +376,6 @@ const PaymentForm = () => {
             </div>
           </div>
 
-          {/* Footer */}
           <DialogFooter className="mt-4 flex justify-between">
             <Button
               variant="secondary"
@@ -378,43 +391,11 @@ const PaymentForm = () => {
               onClick={placeOrder}
               className="font-semibold"
             >
-              Confirm & Print
+              Confirm & Print Invoice
             </Button>
           </DialogFooter>
         </DialogContent>
       )}
-
-      {/* Hidden thermal invoice for printing */}
-      <div style={{ display: "none" }}>
-        <Invoice
-          ref={invoiceRef}
-          order={{
-            orderId: invoiceId || "",
-            items: items.map((i) => ({
-              itemId: i.itemId,
-              variantId: i.variantId,
-              name: i.name,
-              variantName: i.variantName,
-              size: i.size,
-              quantity: i.quantity,
-              price: i.price,
-              bPrice: i.bPrice,
-              discount: i.discount,
-            })),
-            fee: 0,
-            discount: totalDiscount,
-            paymentStatus: "Paid",
-            paymentMethod:
-              payments.length > 1
-                ? "MIXED"
-                : payments[0]?.paymentMethod?.toUpperCase() || "CASH",
-            paymentReceived: payments,
-            from: "Store",
-            createdAt: new Date().toISOString(),
-            status: "Processing",
-          }}
-        />
-      </div>
     </Dialog>
   );
 };
