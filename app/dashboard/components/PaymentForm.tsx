@@ -175,7 +175,6 @@ const PaymentForm = () => {
       };
 
       await addOrder(newOrder);
-      await getAOrder(newOrder.orderId);
       handlePrint();
       dispatch(setShowPaymentDialog(false))
       dispatch(getProducts({ page: currentPage, size: currentSize }));

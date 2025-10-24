@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import { addNewOrder } from "@/services/StockService";
+import { addNewOrder } from "@/services/OrderService";
 
 export const POST = async (req: NextRequest) => {
     try {
