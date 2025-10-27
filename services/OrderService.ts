@@ -1,35 +1,45 @@
 import { adminFirestore } from "@/firebase/firebaseAdmin";
 import { Order } from "@/interfaces";
-import { log } from "console";
 import admin from "firebase-admin";
-
+import { updateOrAddOrderHash } from "./IntegrityService";
 
 // ================================
 // 🔹 ORDER OPERATIONS
 // ================================
-export const addNewOrder = async (order: Order) => {
-  if (!order?.orderId) throw new Error("Invalid order payload");
+const clearPosCart = async () => {
+  try {
+    const snap = await adminFirestore.collection("posCart").get();
+    if (snap.empty) return;
+    const batch = adminFirestore.batch();
+    snap.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+    console.log("POS cart cleared");
+  } catch (error) {
+    console.error("clearPosCart failed:", error);
+    throw error;
+  }
+};
 
+export const addNewOrder = async (order: any) => {
+  if (!order?.orderId) throw new Error("Invalid order payload");
   const orderRef = adminFirestore.collection("orders").doc(order.orderId);
 
-  return adminFirestore.runTransaction(async (tx) => {
-    const existing = await tx.get(orderRef);
-    if (existing.exists) throw new Error(`Order ${order.orderId} already exists`);
-
-    tx.set(orderRef, {
-      ...order,
-      createdAt: admin.firestore.Timestamp.fromDate(new Date(order.createdAt)),
-    });
-  })
+  return adminFirestore
+    .runTransaction(async (tx) => {
+      tx.create(orderRef, {
+        ...order,
+        createdAt: admin.firestore.Timestamp.fromDate(
+          new Date(order.createdAt)
+        ),
+      });
+    })
     .then(async () => {
-      // ✅ Efficiently clear posCart using batch delete
-      const posCartSnap = await adminFirestore.collection("posCart").get();
-      if (!posCartSnap.empty) {
-        const batch = adminFirestore.batch();
-        posCartSnap.docs.forEach((doc) => batch.delete(doc.ref));
-        await batch.commit();
-      }
-      log("Order added & POS cart cleared");
+      const orderDoc = await orderRef.get();
+      if (!orderDoc.exists) throw new Error("Order not found");
+      const data = orderDoc.data();
+
+      await Promise.all([clearPosCart(), updateOrAddOrderHash(data)]);
+      console.log("Order added & POS cart cleared & hash stored");
     })
     .catch((e) => {
       console.error("addNewOrder failed:", e);
@@ -38,11 +48,16 @@ export const addNewOrder = async (order: Order) => {
 };
 
 export const getAOrder = async (orderId: string): Promise<Order> => {
-  const doc = await adminFirestore.collection("orders").doc(orderId).get();
-  if (!doc.exists) throw new Error("Order not found");
+  try {
+    const doc = await adminFirestore.collection("orders").doc(orderId).get();
+    if (!doc.exists) throw new Error("Order not found");
 
-  const data = doc.data() as Order;
-  if (data.from !== "Store") throw new Error("Order not from Store");
+    const data = doc.data() as Order;
+    if (data.from !== "Store") throw new Error("Order not from Store");
 
-  return { ...data, createdAt: data.createdAt.toDate().toLocaleString() };
+    return { ...data, createdAt: data.createdAt.toDate().toLocaleString() };
+  } catch (error) {
+    console.error("getAOrder failed:", error);
+    throw error;
+  }
 };
