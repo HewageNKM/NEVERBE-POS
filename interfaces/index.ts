@@ -85,6 +85,9 @@ export interface Order {
     discount: number,
     status:string,
     fee: number,
+    total: number,
+    transactionFeeCharge:number,
+    shippingFee:number,
     paymentReceived?:Payment[]
     from: string,
     createdAt?: string | Timestamp;

@@ -80,6 +80,15 @@ const PaymentForm = () => {
     [itemsTotal, totalDiscount]
   );
 
+  // NEW: Create a lowercase map for easy, case-insensitive fee lookup
+  const paymentMethodsMap = useMemo(() => {
+    const map = new Map<string, PaymentMethod>();
+    paymentMethods.forEach((method) => {
+      map.set(method.name.toLowerCase(), method);
+    });
+    return map;
+  }, [paymentMethods]);
+
   /** ---------- Add Payment ---------- **/
   const addPayment = () => {
     const amount = parseFloat(paymentAmount);
@@ -154,6 +163,23 @@ const PaymentForm = () => {
   const placeOrder = async () => {
     setLoading(true);
     try {
+      // --- NEW CALCULATIONS ---
+      const fee = 0; // POS orders have no 'other' fee
+      const shippingFee = 0; // POS orders have no shipping
+
+      // Calculate transaction fee
+      const transactionFeeCharge = payments.reduce((acc, payment) => {
+        const method = paymentMethodsMap.get(payment.paymentMethod.toLowerCase());
+        const feePercent = method?.fee || 0;
+        // Rounding fee for each payment to avoid precision errors
+        const paymentFee = Math.round(payment.amount * (feePercent / 100) * 100) / 100;
+        return acc + paymentFee;
+      }, 0);
+
+      // Calculate total (subtotal is already net of discounts)
+      const total = subtotal + shippingFee + fee;
+      // --- END NEW CALCULATIONS ---
+
       const orderItems: OrderItem[] = items.map((i) => ({
         itemId: i.itemId,
         bPrice: i.bPrice,
@@ -169,7 +195,8 @@ const PaymentForm = () => {
       const newOrder: Order = {
         orderId: (invoiceId || "").toLowerCase(),
         items: orderItems,
-        fee: 0,
+        fee: fee,
+        shippingFee: shippingFee,
         discount: totalDiscount,
         paymentReceived: payments,
         createdAt: new Date().toISOString(),
@@ -183,6 +210,9 @@ const PaymentForm = () => {
         ...(payments.length === 1 && {
           paymentMethodId: payments[0].paymentMethodId,
         }),
+        // --- ADDED/UPDATED FIELDS ---
+        total: Math.round(total * 100) / 100, // Add rounded total
+        transactionFeeCharge: Math.round(transactionFeeCharge * 100) / 100, // Add rounded transaction fee
       };
 
       await addOrder(newOrder);
