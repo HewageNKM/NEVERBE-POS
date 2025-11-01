@@ -4,8 +4,9 @@ import { getUserById } from "@/services/UserSerivce";
 
 export const GET = async (
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) => {
+  const { params } = context;
   try {
     console.log("Received GET request at:", req.url);
 
@@ -19,7 +20,7 @@ export const GET = async (
     console.log("Authorization successful.");
 
     // Extract UID from URL
-    const uid = params.userId;
+    const uid = (await params).userId;
     console.log(`Extracted UID from URL: ${uid}`);
 
     if (!uid) {

@@ -5,18 +5,43 @@ import { PaymentMethod } from "@/interfaces";
 // 🔹 PAYMENT METHODS
 // ================================
 export const getAllPaymentMethods = async (): Promise<PaymentMethod[]> => {
-  const snap = await adminFirestore
-    .collection("paymentMethods")
-    .where("status", "==", "Active")
-    .where("available", "array-contains", "Store")
-    .get();
+  try {
+    const snap = await adminFirestore
+      .collection("paymentMethods")
+      .where("status", "==", "Active")
+      .where("available", "array-contains", "Store")
+      .get();
 
-  return snap.docs.map(
-    (d) =>
-      ({
-        paymentId: d.id,
-        ...d.data(),
-        createdAt: d.data().createdAt?.toDate?.().toLocaleString(),
-      } as PaymentMethod)
-  );
+    return snap.docs.map(
+      (d) =>
+        ({
+          paymentId: d.id,
+          ...d.data(),
+          createdAt: d.data().createdAt?.toDate?.().toLocaleString(),
+        } as PaymentMethod)
+    );
+  } catch (error) {
+    console.error("getAllPaymentMethods failed:", error);
+    throw error;
+  }
+};
+
+export const gettAllStockForDropdown = async () => {
+  try {
+    const snap = await adminFirestore
+      .collection("stocks")
+      .where("status", "==", true)
+      .where("isDeleted", "==", false)
+      .get();
+    if (snap.empty) {
+      return [];
+    }
+    const stock = snap.docs.map((d) => ({
+      id: d.id,
+      label: d.data().name,
+    }));
+    return stock;
+  } catch (error) {
+    throw error;
+  }
 };
