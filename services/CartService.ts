@@ -2,7 +2,8 @@
 // 🔹 POS CART OPERATIONS
 
 import { adminFirestore } from "@/firebase/firebaseAdmin";
-import { CartItem, Item } from "@/interfaces";
+import { CartItem } from "@/interfaces";
+import { Product } from "@/interfaces/Product";
 
 // ================================
 export const getPosCart = async (): Promise<CartItem[]> => {
@@ -18,7 +19,7 @@ export const addItemToPosCart = async (item: CartItem) => {
     const itemDoc = await tx.get(inventoryRef);
     if (!itemDoc.exists) throw new Error("Item not found");
 
-    const itemData = itemDoc.data() as Item;
+    const itemData = itemDoc.data() as Product;
     const variant = itemData.variants.find(
       (v) => v.variantId === item.variantId
     );
@@ -71,7 +72,7 @@ export const removeFromPosCart = async (item: CartItem) => {
     const itemDoc = await tx.get(inventoryRef);
     if (!itemDoc.exists) throw new Error("Item not found");
 
-    const itemData = itemDoc.data() as Item;
+    const itemData = itemDoc.data() as Product;
     const variant = itemData.variants.find(
       (v) => v.variantId === item.variantId
     );

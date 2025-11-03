@@ -52,6 +52,7 @@ const PaymentForm = () => {
   const { items, invoiceId, showPaymentDialog } = useAppSelector(
     (state) => state.invoice
   );
+  const stockId = window.localStorage.getItem("neverbePOSStockId");
   const { currentSize, currentPage } = useAppSelector((state) => state.product);
   const { toast } = useToast();
 
@@ -201,6 +202,7 @@ const PaymentForm = () => {
         paymentReceived: payments,
         createdAt: new Date().toISOString(),
         from: "Store",
+        stockId,
         status: "Completed",
         paymentStatus: "Paid",
         paymentMethod:

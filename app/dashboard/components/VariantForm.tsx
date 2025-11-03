@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CartItem, Item, Variant } from "@/interfaces";
 import {
   Dialog,
@@ -32,19 +32,42 @@ import {
 } from "@/lib/prodcutSlice/productSlice";
 import { showAlert } from "@/lib/alertSlice/alertSlice";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { auth } from "@/firebase/firebaseClient";
 
 const VariantForm = () => {
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [discount, setDiscount] = useState(0);
   const [qty, setQty] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [availableStock, setAvailableStock] = useState(0);
+  const stockId = window.localStorage.getItem("neverbePOSStockId");
 
   const { selectedItem, isVariantsFormOpen } = useAppSelector(
     (state) => state.product
   );
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    fetchAvalableStock();
+  }, [selectedSize]);
+
+  const fetchAvalableStock = async () => {
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) return;
+    const res = await axios({
+      url: `/api/v1/inventory?stockId=${stockId}&productId=${selectedItem.id}&variantId=${selectedVariant.variantId}&size=${selectedSize}`,
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setAvailableStock(res.data.quantity);
+  };
+
   const addToCart = async () => {
+    setIsAdding(true);
     const availableStock =
       selectedVariant?.sizes.find((s) => s.size === selectedSize)?.stock || 0;
 
@@ -73,13 +96,12 @@ const VariantForm = () => {
     const newCartItem: CartItem = {
       bPrice: selectedItem?.buyingPrice,
       discount: totalDiscount,
-      itemId: selectedItem?.itemId || "",
+      itemId: selectedItem?.id || "",
       name: selectedItem?.name || "",
       price: selectedItem?.sellingPrice || 0,
       quantity: qty,
       size: selectedSize,
       thumbnail: selectedItem?.thumbnail.url || "",
-      type: selectedItem?.type || "",
       variantId: selectedVariant?.variantId || "",
       variantName: selectedVariant?.variantName || "",
     };
@@ -95,6 +117,7 @@ const VariantForm = () => {
     } finally {
       dispatch(getPosCartItems());
       dispatch(setIsInvoiceLoading(false));
+      setIsAdding(false);
     }
   };
 
@@ -178,8 +201,8 @@ const VariantForm = () => {
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-neutral-800">
                     {selectedVariant.sizes.map((size) => (
-                      <SelectItem key={size.size} value={size.size}>
-                        {size.size} — {size.stock} in stock
+                      <SelectItem key={size} value={size}>
+                        {size}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -192,6 +215,7 @@ const VariantForm = () => {
                     Quantity
                   </Label>
                   <Input
+                    disabled={isAdding}
                     className="mt-1 bg-white dark:bg-neutral-900 border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100"
                     type="number"
                     min="1"
@@ -205,6 +229,7 @@ const VariantForm = () => {
                     Discount
                   </Label>
                   <Input
+                    disabled={isAdding}
                     className="mt-1 bg-white dark:bg-neutral-900 border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100"
                     type="number"
                     value={discount.toString()}
@@ -222,10 +247,7 @@ const VariantForm = () => {
                   className="text-xs text-right text-gray-500 dark:text-gray-400"
                 >
                   Available Stock:{" "}
-                  {
-                    selectedVariant.sizes.find((s) => s.size === selectedSize)
-                      ?.stock
-                  }
+                  {availableStock}
                 </motion.p>
               )}
             </motion.div>
@@ -264,7 +286,7 @@ const VariantForm = () => {
               disabled={!selectedVariant || !selectedSize || qty < 1}
               onClick={addToCart}
             >
-              Add to Cart
+              {isAdding ? "Adding...." : "Add to Cart"}
             </Button>
           </motion.div>
         </DialogFooter>

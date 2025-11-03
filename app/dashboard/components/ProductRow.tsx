@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { Item } from "@/interfaces";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Product } from "@/interfaces/Product";
 
 interface ProductRowProps {
-  product: Item;
-  onSelect: (product: Item) => void;
+  product: Product;
+  onSelect: (product: Product) => void;
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({ product, onSelect }) => {
@@ -51,7 +51,7 @@ const ProductRow: React.FC<ProductRowProps> = ({ product, onSelect }) => {
 
       {/* Manufacturer */}
       <div className="text-sm capitalize md:text-base text-muted-foreground">
-        {product.manufacturer || "-"}
+        {product.brand || "-"}
       </div>
 
       {/* Name */}

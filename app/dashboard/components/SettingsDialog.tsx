@@ -31,7 +31,6 @@ const SettingsDialog = ({ open, onOpenChange, user }: SettingsDialogProps) => {
   const [stocks, setStocks] = useState<any[]>([]);
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (open) fetchStocks();

@@ -1,7 +1,8 @@
 import {auth} from "@/firebase/firebaseClient"
 import axios from "axios";
 
-export const getInventory = async (page: number, size: number) => {
+
+export const getInventory = async (page: number, size: number, stockId:string) => {
     try {
         const token = await auth.currentUser?.getIdToken();
 
@@ -10,7 +11,7 @@ export const getInventory = async (page: number, size: number) => {
             headers: {
                 Authorization: `Bearer ${token}`
             },
-            url: `/api/v1/inventory?page=${page}&size=${size}`,
+            url: `/api/v1/products?page=${page}&size=${size}&stockId=${stockId}`,
         });
         return response.data;
     } catch (e) {

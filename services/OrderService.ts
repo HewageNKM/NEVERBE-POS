@@ -20,32 +20,6 @@ const clearPosCart = async () => {
   }
 };
 
-export const addNewOrder = async (order: any) => {
-  if (!order?.orderId) throw new Error("Invalid order payload");
-  const orderRef = adminFirestore.collection("orders").doc(order.orderId);
-
-  return adminFirestore
-    .runTransaction(async (tx) => {
-      tx.create(orderRef, {
-        ...order,
-        createdAt: admin.firestore.Timestamp.fromDate(
-          new Date(order.createdAt)
-        ),
-      });
-    })
-    .then(async () => {
-      const orderDoc = await orderRef.get();
-      if (!orderDoc.exists) throw new Error("Order not found");
-      const data = orderDoc.data();
-
-      await Promise.all([clearPosCart(), updateOrAddOrderHash(data)]);
-      console.log("Order added & POS cart cleared & hash stored");
-    })
-    .catch((e) => {
-      console.error("addNewOrder failed:", e);
-      throw e;
-    });
-};
 
 export const getAOrder = async (orderId: string): Promise<Order> => {
   try {

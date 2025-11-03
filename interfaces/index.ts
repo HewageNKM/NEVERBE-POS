@@ -1,22 +1,5 @@
 import {Timestamp} from "@firebase/firestore";
 
-export interface Item {
-    itemId: string,
-    type: string,
-    brand: string,
-    thumbnail: {
-        file: File | string,
-        url: string,
-    },
-    variants: Variant[],
-    manufacturer: string,
-    status: "Active" | "Inactive",
-    name: string,
-    sellingPrice: number,
-    buyingPrice: number,
-    discount: number,
-}
-
 export interface PaymentMethod {
     paymentId:string
     name: string
@@ -37,16 +20,6 @@ export interface Payment {
 export interface Size {
     size: string,
     stock: number,
-}
-
-export interface Variant {
-    variantId: string,
-    variantName: string,
-    images: [{
-        file: File | string,
-        url: string,
-    }],
-    sizes: Size[],
 }
 
 export interface CartItem {
@@ -84,6 +57,7 @@ export interface Order {
     paymentMethodId?:string,
     discount: number,
     status:string,
+    stockId:string,
     fee: number,
     total: number,
     transactionFeeCharge:number,

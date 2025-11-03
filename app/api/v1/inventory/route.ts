@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import { getInventory } from "@/services/ProductsService";
+import { getProducts, getStockInventory } from "@/services/ProductsService";
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -13,10 +13,18 @@ export const GET = async (req: NextRequest) => {
         }
         console.log("Authorization successful.");
         const url = new URL(req.url);
-        const page = Number.parseInt(url.searchParams.get('page') || '1');
-        const size = Number.parseInt(url.searchParams.get('size') || '20');
+        const stockId = url.searchParams.get('stockId') || ''
+        const productId = url.searchParams.get('productId') || ''
+        const variantId = url.searchParams.get('variantId') || ''
+        const size = url.searchParams.get('size') || ''
 
-        const items = await getInventory(page, size);
+
+        const items = await getStockInventory(
+            stockId,
+            productId,
+            variantId,
+            size
+        );
         return NextResponse.json(items);
     } catch (error) {
         console.error("An error occurred while processing the GET request:", error);

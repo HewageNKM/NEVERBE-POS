@@ -1,8 +1,8 @@
 import {NextRequest, NextResponse} from "next/server";
 import {authorizeRequest} from "@/lib/midlleware";
-import { addNewOrder } from "@/services/OrderService";
+import { getProducts } from "@/services/ProductsService";
 
-export const POST = async (req: NextRequest) => {
+export const GET = async (req: NextRequest) => {
     try {
         // Authorize the request
         console.log("Attempting to authorize request...");
@@ -12,12 +12,15 @@ export const POST = async (req: NextRequest) => {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
         console.log("Authorization successful.");
-        const json = await req.json();
-        await addNewOrder(json);
-        return NextResponse.json("POST request received");
+        const url = new URL(req.url);
+        const page = Number.parseInt(url.searchParams.get('page') || '1');
+        const size = Number.parseInt(url.searchParams.get('size') || '20');
+        const stockId = url.searchParams.get('stockId') || "";
+
+        const items = await getProducts(page, size,stockId);
+        return NextResponse.json(items);
     } catch (error) {
-        console.error("An error occurred while processing the POST request:", error);
+        console.error("An error occurred while processing the GET request:", error);
         return NextResponse.json({message: error.message}, {status: 500});
     }
-
-}
+};
