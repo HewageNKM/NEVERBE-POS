@@ -34,7 +34,7 @@ const Hero = () => {
     dispatch(setIsLoading(true));
     try {
       const results = await client.search({
-        requests: [{ indexName: "inventory_index", query }],
+        requests: [{ indexName: "products_index", query }],
       });
       const filterInactives = results.results[0].hits.filter(
         (item: Item) => item.status === "Active"
