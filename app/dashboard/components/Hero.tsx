@@ -20,7 +20,10 @@ const Hero = () => {
   const [showCashDialog, setShowCashDialog] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
 
-  const storeId = typeof window !== "undefined" ? window.localStorage.getItem("neverbePOSStoreId") : null;
+  const storeId =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("neverbePOSStoreId")
+      : null;
   const dispatch = useAppDispatch();
   const authUser = useAppSelector((state: RootState) => state.auth.user);
 
@@ -36,10 +39,10 @@ const Hero = () => {
       const results = await client.search({
         requests: [{ indexName: "products_index", query }],
       });
-      const filterInactives = results.results[0].hits.filter(
-        (item: Item) => item.status === "Active"
+      const filterProducts = results.results[0].hits.filter(
+        (item: Item) => item.status === true && item.isDeleted === false
       );
-      dispatch(setProducts(filterInactives));
+      dispatch(setProducts(filterProducts));
       setQuery("");
     } catch (e) {
       console.error(e);
@@ -64,20 +67,35 @@ const Hero = () => {
         </form>
 
         <div className="flex flex-row gap-2 mt-2 md:mt-0">
-          <Button onClick={() => setShowInvoicesForm(true)} variant="secondary" size="icon">
+          <Button
+            onClick={() => setShowInvoicesForm(true)}
+            variant="secondary"
+            size="icon"
+          >
             <FileText className="w-5 h-5" />
           </Button>
-          <Button onClick={() => setShowCashDialog(true)} variant="secondary" size="icon">
+          <Button
+            onClick={() => setShowCashDialog(true)}
+            variant="secondary"
+            size="icon"
+          >
             <DollarSign className="w-5 h-5" />
           </Button>
-          <Button onClick={() => setShowSettingsDialog(true)} variant="secondary" size="icon">
+          <Button
+            onClick={() => setShowSettingsDialog(true)}
+            variant="secondary"
+            size="icon"
+          >
             <Settings className="w-5 h-5" />
           </Button>
           <DarkModeSelector />
         </div>
       </div>
 
-      <InvoiceDialog open={showInvoicesForm} onOpenChange={setShowInvoicesForm} />
+      <InvoiceDialog
+        open={showInvoicesForm}
+        onOpenChange={setShowInvoicesForm}
+      />
       <PrettyCashDialog
         open={showCashDialog}
         onOpenChange={setShowCashDialog}
