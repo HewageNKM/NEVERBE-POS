@@ -1,25 +1,5 @@
 import { adminFirestore } from "@/firebase/firebaseAdmin";
 import { Order } from "@/interfaces";
-import admin from "firebase-admin";
-import { updateOrAddOrderHash } from "./IntegrityService";
-
-// ================================
-// 🔹 ORDER OPERATIONS
-// ================================
-const clearPosCart = async () => {
-  try {
-    const snap = await adminFirestore.collection("posCart").get();
-    if (snap.empty) return;
-    const batch = adminFirestore.batch();
-    snap.docs.forEach((doc) => batch.delete(doc.ref));
-    await batch.commit();
-    console.log("POS cart cleared");
-  } catch (error) {
-    console.error("clearPosCart failed:", error);
-    throw error;
-  }
-};
-
 
 export const getAOrder = async (orderId: string): Promise<Order> => {
   try {
