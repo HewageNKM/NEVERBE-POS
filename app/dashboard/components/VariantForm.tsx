@@ -54,23 +54,24 @@ const VariantForm = () => {
   }, [selectedSize]);
 
   const fetchAvalableStock = async () => {
-    const token = await auth.currentUser?.getIdToken();
-    if (!token) return;
-    const res = await axios({
-      url: `/api/v1/inventory?stockId=${stockId}&productId=${selectedItem.id}&variantId=${selectedVariant.variantId}&size=${selectedSize}`,
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    setAvailableStock(res.data.quantity);
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await axios({
+        url: `/api/v1/inventory?stockId=${stockId}&productId=${selectedItem.id}&variantId=${selectedVariant.variantId}&size=${selectedSize}`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setAvailableStock(res.data.quantity);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const addToCart = async () => {
     setIsAdding(true);
-    const availableStock =
-      selectedVariant?.sizes.find((s) => s.size === selectedSize)?.stock || 0;
-
     if (qty > availableStock) {
       dispatch(
         showAlert({
@@ -246,8 +247,7 @@ const VariantForm = () => {
                   animate={{ opacity: 1 }}
                   className="text-xs text-right text-gray-500 dark:text-gray-400"
                 >
-                  Available Stock:{" "}
-                  {availableStock}
+                  Available Stock: {availableStock}
                 </motion.p>
               )}
             </motion.div>
