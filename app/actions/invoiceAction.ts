@@ -57,7 +57,7 @@ export const addOrder = async (order: Order) => {
         const token = await auth.currentUser?.getIdToken();
         return await axios({
             method: 'POST',
-            url: 'https://admin.neverbe.lk/api/v2/orders',
+            url: 'https://erp.neverbe.lk/api/v2/orders',
             data: JSON.stringify(order),
             headers: {
                 'Content-Type': 'application/json',
