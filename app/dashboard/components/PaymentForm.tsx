@@ -169,13 +169,18 @@ const PaymentForm = () => {
       const shippingFee = 0; // POS orders have no shipping
 
       // Calculate transaction fee
-      const transactionFeeCharge = payments.reduce((acc, payment) => {
-        const method = paymentMethodsMap.get(payment.paymentMethod.toLowerCase());
-        const feePercent = method?.fee || 0;
-        // Rounding fee for each payment to avoid precision errors
-        const paymentFee = Math.round(payment.amount * (feePercent / 100) * 100) / 100;
-        return acc + paymentFee;
-      }, 0);
+      const transactionFeeCharge = parseFloat(
+        payments
+          .reduce((acc, payment) => {
+            const method = paymentMethodsMap.get(
+              payment.paymentMethod.toLowerCase()
+            );
+            const feePercent = method?.fee || 0;
+            const paymentFee = payment.amount * (feePercent / 100);
+            return acc + paymentFee;
+          }, 0)
+          .toFixed(2)
+      );
 
       // Calculate total (subtotal is already net of discounts)
       const total = subtotal + shippingFee + fee;
