@@ -3,99 +3,94 @@
 
 import { adminFirestore } from "@/firebase/firebaseAdmin";
 import { CartItem } from "@/interfaces";
-import { Product } from "@/interfaces/Product";
+import { InventoryItem } from "@/interfaces/InventoryItem";
+import { FieldValue } from "firebase-admin/firestore";
 
 // ================================
+
+// ✅ Get all items in POS cart
 export const getPosCart = async (): Promise<CartItem[]> => {
   const snap = await adminFirestore.collection("posCart").get();
   return snap.docs.map((d) => d.data() as CartItem);
 };
 
-export const addItemToPosCart = async (item: CartItem) => {
-  const inventoryRef = adminFirestore.collection("inventory").doc(item.itemId);
+// ================================
+// ✅ Add item to POS cart using InventoryItem info
+export const addItemToPosCart = async (item: CartItem & { stockId: string }) => {
   const posCart = adminFirestore.collection("posCart");
 
   await adminFirestore.runTransaction(async (tx) => {
-    const itemDoc = await tx.get(inventoryRef);
-    if (!itemDoc.exists) throw new Error("Item not found");
-
-    const itemData = itemDoc.data() as Product;
-    const variant = itemData.variants.find(
-      (v) => v.variantId === item.variantId
-    );
-    if (!variant) throw new Error("Variant not found");
-
-    const size = variant.sizes.find((s) => s.size === item.size);
-    if (!size) throw new Error("Size not found");
-    
-    if (size.stock < item.quantity) {
-      console.log("Not enough stock but moving forward");
-    }
-
-    // ✅ Deduct stock
-    variant.sizes = variant.sizes.map((s) =>
-      s.size === item.size ? { ...s, stock: s.stock - item.quantity } : s
-    );
-
-    const updatedVariants = itemData.variants.map((v) =>
-      v.variantId === item.variantId ? variant : v
-    );
-    tx.update(inventoryRef, { variants: updatedVariants });
-
-    // ✅ Add/update cart item
-    const existing = await posCart
-      .where("itemId", "==", item.itemId)
+    // 1️⃣ Fetch inventory item using productId, variantId, size, stockId
+    const inventoryQuery = await adminFirestore
+      .collection("stock_inventory")
+      .where("productId", "==", item.itemId)
       .where("variantId", "==", item.variantId)
       .where("size", "==", item.size)
+      .where("stockId", "==", item.stockId)
       .limit(1)
       .get();
 
-    if (!existing.empty) {
-      const ref = existing.docs[0].ref;
-      const existingData = existing.docs[0].data() as CartItem;
+    if (inventoryQuery.empty) throw new Error("Item not found in inventory");
 
-      if (existingData.discount > 0)
-        throw new Error("Item with discount exists. Remove first.");
+    const inventoryRef = inventoryQuery.docs[0].ref;
+    const inventoryData = inventoryQuery.docs[0].data() as InventoryItem;
 
-      tx.update(ref, { quantity: existingData.quantity + item.quantity });
-    } else {
-      tx.set(posCart.doc(), { ...item, createdAt: new Date() });
+    // 2️⃣ Check if requested quantity is bigger than available
+    if (item.quantity > inventoryData.quantity) {
+      console.warn(
+        `Warning: Requested quantity (${item.quantity}) is greater than available stock (${inventoryData.quantity}) for productId: ${item.itemId}, size: ${item.size}, stockId: ${item.stockId}`
+      );
+    }
+
+    // 3️⃣ Deduct stock (allow negative)
+    tx.update(inventoryRef, {
+      quantity: inventoryData.quantity - item.quantity,
+    });
+
+    // 4️⃣ Add to POS cart
+    tx.set(posCart.doc(), { ...item, createdAt: FieldValue.serverTimestamp() });
+  });
+};
+
+
+// ================================
+// ✅ Remove item from POS cart and restock
+export const removeFromPosCart = async (item: CartItem & { stockId: string }) => {
+  const posCart = adminFirestore.collection("posCart");
+
+  await adminFirestore.runTransaction(async (tx) => {
+    // 1️⃣ Fetch inventory item
+    const inventoryQuery = await adminFirestore
+      .collection("stock_inventory")
+      .where("productId", "==", item.itemId)
+      .where("variantId", "==", item.variantId)
+      .where("size", "==", item.size)
+      .where("stockId", "==", item.stockId)
+      .limit(1)
+      .get();
+
+    if (inventoryQuery.empty) throw new Error("Item not found in inventory");
+
+    const inventoryRef = inventoryQuery.docs[0].ref;
+    const inventoryData = inventoryQuery.docs[0].data() as InventoryItem;
+
+    // 2️⃣ Restore stock
+    tx.update(inventoryRef, {
+      quantity: inventoryData.quantity + item.quantity,
+    });
+
+    // 3️⃣ Delete item from POS cart
+    const cartQuery = await posCart
+      .where("itemId", "==", item.itemId)
+      .where("variantId", "==", item.variantId)
+      .where("size", "==", item.size)
+      .where("stockId", "==", item.stockId)
+      .limit(1)
+      .get();
+
+    if (!cartQuery.empty) {
+      tx.delete(cartQuery.docs[0].ref);
     }
   });
 };
 
-export const removeFromPosCart = async (item: CartItem) => {
-  const inventoryRef = adminFirestore.collection("inventory").doc(item.itemId);
-  const posCart = adminFirestore.collection("posCart");
-
-  await adminFirestore.runTransaction(async (tx) => {
-    const itemDoc = await tx.get(inventoryRef);
-    if (!itemDoc.exists) throw new Error("Item not found");
-
-    const itemData = itemDoc.data() as Product;
-    const variant = itemData.variants.find(
-      (v) => v.variantId === item.variantId
-    );
-    if (!variant) throw new Error("Variant not found");
-
-    // ✅ Restore stock
-    variant.sizes = variant.sizes.map((s) =>
-      s.size === item.size ? { ...s, stock: s.stock + item.quantity } : s
-    );
-
-    const updatedVariants = itemData.variants.map((v) =>
-      v.variantId === item.variantId ? variant : v
-    );
-    tx.update(inventoryRef, { variants: updatedVariants });
-
-    // ✅ Delete from cart
-    const existing = await posCart
-      .where("itemId", "==", item.itemId)
-      .where("variantId", "==", item.variantId)
-      .where("size", "==", item.size)
-      .limit(1)
-      .get();
-
-    if (!existing.empty) tx.delete(existing.docs[0].ref);
-  });
-};

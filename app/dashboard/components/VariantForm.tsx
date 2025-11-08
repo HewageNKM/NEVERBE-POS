@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { CartItem, Item, Variant } from "@/interfaces";
+import { CartItem } from "@/interfaces";
 import {
   Dialog,
   DialogContent,
@@ -34,9 +34,12 @@ import { showAlert } from "@/lib/alertSlice/alertSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { auth } from "@/firebase/firebaseClient";
+import { ProductVariant } from "@/interfaces/ProductVariant";
 
 const VariantForm = () => {
-  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
+    null
+  );
   const [selectedSize, setSelectedSize] = useState("");
   const [discount, setDiscount] = useState(0);
   const [qty, setQty] = useState(1);
@@ -101,7 +104,9 @@ const VariantForm = () => {
       name: selectedItem?.name || "",
       price: selectedItem?.sellingPrice || 0,
       quantity: qty,
+      stockId,
       size: selectedSize,
+      type: selectedItem?.category || "",
       thumbnail: selectedItem?.thumbnail.url || "",
       variantId: selectedVariant?.variantId || "",
       variantName: selectedVariant?.variantName || "",
