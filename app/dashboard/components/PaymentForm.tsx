@@ -38,8 +38,6 @@ import {
   initializeInvoicedId,
   setShowPaymentDialog,
 } from "@/lib/invoiceSlice/invoiceSlice";
-import { getProducts } from "@/lib/prodcutSlice/productSlice";
-import { addOrder } from "@/app/actions/invoiceAction";
 import { getPOSPaymentMethods } from "@/app/actions/paymentsAction";
 import { useToast } from "@/hooks/use-toast";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -53,7 +51,6 @@ const PaymentForm = () => {
     (state) => state.invoice
   );
   const stockId = window.localStorage.getItem("neverbePOSStockId");
-  const { currentSize, currentPage } = useAppSelector((state) => state.product);
   const { toast } = useToast();
 
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -63,7 +60,6 @@ const PaymentForm = () => {
   const [loading, setLoading] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
-  /** ---------- Derived Values ---------- **/
   const itemsTotal = useMemo(
     () => items.reduce((acc, i) => acc + i.quantity * i.price, 0),
     [items]
@@ -81,7 +77,6 @@ const PaymentForm = () => {
     [itemsTotal, totalDiscount]
   );
 
-  // NEW: Create a lowercase map for easy, case-insensitive fee lookup
   const paymentMethodsMap = useMemo(() => {
     const map = new Map<string, PaymentMethod>();
     paymentMethods.forEach((method) => {
@@ -89,6 +84,27 @@ const PaymentForm = () => {
     });
     return map;
   }, [paymentMethods]);
+
+  const currentMethodObj = useMemo(() => {
+    return paymentMethodsMap.get(selectedPaymentMethod.toLowerCase());
+  }, [selectedPaymentMethod, paymentMethodsMap]);
+
+  const isPm006 = currentMethodObj?.paymentId === "pm-006";
+
+  useEffect(() => {
+    const dueAmount = subtotal - paymentsTotal;
+
+    if (isPm006 && dueAmount > 0) {
+      const feePercent = currentMethodObj?.fee || 0;
+      // We calculate the fee based on the principal (dueAmount)
+      const feeAmount = dueAmount * (feePercent / 100) * 0.75;
+      const totalWithFee = dueAmount + feeAmount;
+
+      setPaymentAmount(totalWithFee.toFixed(2));
+    } else if (isPm006 && dueAmount <= 0) {
+      setPaymentAmount("0");
+    }
+  }, [isPm006, subtotal, paymentsTotal, currentMethodObj]);
 
   /** ---------- Add Payment ---------- **/
   const addPayment = () => {
@@ -102,17 +118,20 @@ const PaymentForm = () => {
         variant: "destructive",
       });
 
-    if (
-      ["card", "bank transfer", "qr"].includes(
-        selectedPaymentMethod.toLowerCase()
-      ) &&
-      amount > dueAmount
-    )
-      return toast({
-        title: "Invalid Amount",
-        description: "Amount exceeds the due amount.",
-        variant: "destructive",
-      });
+    if (!isPm006) {
+      if (
+        ["card", "bank transfer", "qr"].includes(
+          selectedPaymentMethod.toLowerCase()
+        ) &&
+        amount > dueAmount + 0.5
+      ) {
+        return toast({
+          title: "Invalid Amount",
+          description: "Amount exceeds the due amount.",
+          variant: "destructive",
+        });
+      }
+    }
 
     if (
       selectedPaymentMethod.toLowerCase() === "card" &&
@@ -124,15 +143,10 @@ const PaymentForm = () => {
         variant: "destructive",
       });
 
-    const method =
-      paymentMethods.find(
-        (m) => m.name.toLowerCase() === selectedPaymentMethod.toLowerCase()
-      ) || ({} as PaymentMethod);
-
     const newPayment: Payment = {
       id: new Date().getTime().toString().slice(1, 5),
       paymentMethod: selectedPaymentMethod,
-      paymentMethodId: method.paymentId || "",
+      paymentMethodId: currentMethodObj?.paymentId || "",
       amount,
       cardNumber: cardNumber || "None",
     };
@@ -143,32 +157,37 @@ const PaymentForm = () => {
     setCardNumber(null);
   };
 
-  /** ---------- Generate & Auto-Print PDF ---------- **/
   const generatePDF = async (order: Order) => {
     const blob = await pdf(<InvoicePDF order={order} />).toBlob();
     const url = URL.createObjectURL(blob);
-
-    // Open the PDF in a new tab and trigger the print dialog
-    const printWindow = window.open(url);
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.focus();
-        printWindow.print();
-      };
-    } else {
-      console.error("Unable to open print window. Popups may be blocked.");
-    }
+    window.open(url);
   };
 
-  /** ---------- Place Order ---------- **/
   const placeOrder = async () => {
     setLoading(true);
     try {
-      // --- NEW CALCULATIONS ---
-      const fee = 0; // POS orders have no 'other' fee
-      const shippingFee = 0; // POS orders have no shipping
+      const fee = parseFloat(
+        payments
+          .reduce((acc, payment) => {
+            const method = paymentMethodsMap.get(
+              payment.paymentMethod.toLowerCase()
+            );
+            if (payment.paymentMethodId == "pm-006") {
+              const feePercent = method?.fee || 0;
+              const effectiveRate = (feePercent / 100) * 0.75;
+              
+              const principal = payment.amount / (1 + effectiveRate);
+              const paymentFee = payment.amount - principal;
+              
+              return acc + paymentFee;
+            }
+            return acc;
+          }, 0)
+          .toFixed(2)
+      );
 
-      // Calculate transaction fee
+      const shippingFee = 0;
+
       const transactionFeeCharge = parseFloat(
         payments
           .reduce((acc, payment) => {
@@ -182,9 +201,7 @@ const PaymentForm = () => {
           .toFixed(2)
       );
 
-      // Calculate total (subtotal is already net of discounts)
       const total = subtotal + shippingFee + fee;
-      // --- END NEW CALCULATIONS ---
 
       const orderItems: OrderItem[] = items.map((i) => ({
         itemId: i.itemId,
@@ -217,17 +234,13 @@ const PaymentForm = () => {
         ...(payments.length === 1 && {
           paymentMethodId: payments[0].paymentMethodId,
         }),
-        // --- ADDED/UPDATED FIELDS ---
-        total: Math.round(total * 100) / 100, // Add rounded total
-        transactionFeeCharge: Math.round(transactionFeeCharge * 100) / 100, // Add rounded transaction fee
+        total: Math.round(total * 100) / 100,
+        transactionFeeCharge: Math.round(transactionFeeCharge * 100) / 100,
       };
 
       await addOrder(newOrder);
       await generatePDF(newOrder);
-
-      // Reset state
-      dispatch(getProducts({ page: currentPage, size: currentSize }));
-      toast({ title: "Order Placed", description: "Invoice generated." });
+      console.log("Order Placed", newOrder);
     } catch (e: any) {
       toast({
         title: "Error",
@@ -243,7 +256,6 @@ const PaymentForm = () => {
     }
   };
 
-  /** ---------- Fetch Payment Methods ---------- **/
   const fetchPaymentMethods = async () => {
     try {
       const methods = await getPOSPaymentMethods();
@@ -257,7 +269,13 @@ const PaymentForm = () => {
     fetchPaymentMethods();
   }, []);
 
-  /** ---------- Render ---------- **/
+  const pendingDue = subtotal - paymentsTotal;
+  
+  const currentFeeAmount =
+    isPm006 && pendingDue > 0
+      ? pendingDue * ((currentMethodObj?.fee || 0) / 100) * 0.75
+      : 0;
+
   return (
     <Dialog
       open={showPaymentDialog}
@@ -320,7 +338,7 @@ const PaymentForm = () => {
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={5} className="font-semibold">
-                    Total
+                    Total Paid
                   </TableCell>
                   <TableCell className="text-right font-bold">
                     LKR {paymentsTotal.toFixed(2)}
@@ -370,12 +388,21 @@ const PaymentForm = () => {
                 />
               )}
 
-              <Input
-                type="number"
-                placeholder="Enter amount"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-              />
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-muted-foreground">
+                  {isPm006 ? "Amount (Fee Inclusive)" : "Amount"}
+                </label>
+                <Input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={paymentAmount}
+                  readOnly={isPm006}
+                  className={
+                    isPm006 ? "bg-muted text-muted-foreground font-semibold" : ""
+                  }
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                />
+              </div>
 
               <Button className="self-end" onClick={addPayment}>
                 Add Payment
@@ -394,18 +421,32 @@ const PaymentForm = () => {
                       -{totalDiscount.toFixed(2)}
                     </TableCell>
                   </TableRow>
+
+                  {/* Added Transaction Fee Row */}
+                  {isPm006 && pendingDue > 0 && (
+                    <TableRow>
+                      <TableCell className="text-right font-semibold text-muted-foreground">
+                        Transaction Fee ({currentMethodObj?.fee}%)
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        +{currentFeeAmount.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+
                   <TableRow>
                     <TableCell className="text-right font-bold">
-                      {subtotal - paymentsTotal > 0 ? "Due" : "Change"}
+                      {pendingDue > 0 ? "Due" : "Change"}
                     </TableCell>
                     <TableCell
                       className={`text-right ${
-                        subtotal - paymentsTotal > 0
-                          ? "text-red-500"
-                          : "text-green-500"
+                        pendingDue > 0 ? "text-red-500" : "text-green-500"
                       }`}
                     >
-                      {(subtotal - paymentsTotal).toFixed(2)}
+                      {/* If PM-006 is active, visual due amount includes the fee */}
+                      {isPm006 && pendingDue > 0
+                        ? (pendingDue + currentFeeAmount).toFixed(2)
+                        : pendingDue.toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

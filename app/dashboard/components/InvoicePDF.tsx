@@ -108,6 +108,9 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ order }) => {
             Discount: -{totalDiscount.toFixed(2)}
           </Text>
           <Text style={{ fontSize: 8, fontWeight: "bold" }}>
+            Fee: {order.fee?.toFixed(2)}
+          </Text>
+          <Text style={{ fontSize: 8, fontWeight: "bold" }}>
             Total: {grandTotal.toFixed(2)}
           </Text>
         </View>
